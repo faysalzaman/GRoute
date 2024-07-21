@@ -49,28 +49,33 @@ class _ViewedAssignedRoutesScreenState
                     Container(
                       width: double.infinity,
                       height: context.height() * 0.35,
+                      padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.primaryColor)),
-                      child: ListView.builder(
+                        border: Border.all(color: AppColors.primaryColor),
+                      ),
+                      child: ListView.separated(
                         itemCount: 4,
                         shrinkWrap: true,
+                        separatorBuilder: (context, index) => 10.height,
                         itemBuilder: (context, index) {
-                          return Container(
-                            padding: const EdgeInsets.all(5),
-                            margin: const EdgeInsets.all(5),
-                            width: context.width() * 0.8,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              border: Border.all(),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(child: Text("${index + 1}")),
-                                const Expanded(
-                                  flex: 3,
-                                  child: Text("SKR239w9er0wq99827382"),
-                                ),
-                              ],
+                          return Material(
+                            elevation: 5,
+                            child: Container(
+                              padding: const EdgeInsets.all(5),
+                              width: context.width() * 0.8,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                border: Border.all(),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(child: Text("${index + 1}")),
+                                  const Expanded(
+                                    flex: 3,
+                                    child: Text("SKR239w9er0wq99827382"),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
@@ -99,7 +104,11 @@ class _ViewedAssignedRoutesScreenState
                       width: double.infinity,
                       height: context.height() * 0.35,
                       decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.primaryColor)),
+                        border: Border.all(color: AppColors.primaryColor),
+                      ),
+                      child: const Center(
+                        child: Text("Google Map"),
+                      ),
                     ),
                   ],
                 ),

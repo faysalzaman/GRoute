@@ -1,7 +1,10 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:g_route/constants/app_colors.dart';
+import 'package:g_route/cubit/auth_cubit/auth_cubit.dart';
+import 'package:g_route/cubit/auth_cubit/auth_state.dart';
 import 'package:g_route/screens/home_screen/home_screen.dart';
 import 'package:g_route/utils/app_navigator.dart';
 import 'package:g_route/widgets/bottom_line_widget.dart';
@@ -32,6 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   bool isEnglish = true;
+
+  AuthCubit authCubit = AuthCubit();
 
   @override
   Widget build(BuildContext context) {
@@ -108,9 +113,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           controller: _loginIdController,
                           focusNode: _loginIdFocus,
                           decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.all(10),
                             labelText: 'Enter your Login ID',
                             prefixIcon: Icon(Icons.person),
                             border: OutlineInputBorder(),
+                            labelStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
                           ),
                           onSubmitted: (_) {
                             FocusScope.of(context).requestFocus(_passwordFocus);
@@ -142,7 +152,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           obscureText: !_isPasswordVisible,
                           decoration: InputDecoration(
                             labelText: 'Enter your Password',
+                            contentPadding: const EdgeInsets.all(10),
                             prefixIcon: const Icon(Icons.lock),
+                            labelStyle: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _isPasswordVisible
@@ -195,26 +210,54 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    height: MediaQuery.of(context).size.height * 0.06,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextButton(
-                      onPressed: () {
-                        AppNavigator.goToPage(
+                  BlocConsumer<AuthCubit, AuthState>(
+                    bloc: authCubit,
+                    listener: (context, state) {
+                      if (state is AuthSuccess) {
+                        AppNavigator.replaceAll(
                             context: context, screen: const HomeScreen());
-                      },
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
+                      } else if (state is AuthFailed) {
+                        toast(state.error);
+                      }
+                    },
+                    builder: (context, state) {
+                      return Container(
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor,
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                      ),
-                    ),
+                        child: TextButton(
+                          onPressed: () {
+                            if (_loginIdController.text.isEmpty ||
+                                _passwordController.text.isEmpty) {
+                              toast("Please enter Login ID and Password");
+                              return;
+                            }
+
+                            authCubit.login(
+                              _loginIdController.text.trim(),
+                              _passwordController.text.trim(),
+                            );
+                          },
+                          child: state is AuthLoading
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
