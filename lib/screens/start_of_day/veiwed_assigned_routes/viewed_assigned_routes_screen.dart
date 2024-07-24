@@ -65,6 +65,7 @@ class _ViewedAssignedRoutesScreenState
                               width: context.width() * 0.8,
                               height: 40,
                               decoration: BoxDecoration(
+                                color: Colors.white,
                                 border: Border.all(),
                               ),
                               child: Row(

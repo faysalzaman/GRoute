@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:g_route/constants/app_colors.dart';
 import 'package:g_route/screens/home_screen/widget/grid_item.dart';
+import 'package:g_route/screens/sales_order_management/sales_order_management_screen.dart';
 import 'package:g_route/screens/start_of_day/start_of_day_screen.dart';
 import 'package:g_route/utils/app_navigator.dart';
 import 'package:g_route/widgets/bottom_line_widget.dart';
@@ -61,7 +62,10 @@ class _HomeScreenState extends State<HomeScreen> {
             "name": "Custom Profile",
           }
         ],
-        () {},
+        () {
+          AppNavigator.goToPage(
+              context: context, screen: const SalesOrderManagementScreen());
+        },
       ),
       GridItem(
         'Inventory Management',

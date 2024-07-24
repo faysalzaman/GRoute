@@ -104,9 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       10.width,
                       Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
+                            borderRadius: BorderRadius.circular(10)),
                         width: MediaQuery.of(context).size.width * 0.7,
                         height: MediaQuery.of(context).size.height * 0.07,
                         child: TextField(
@@ -141,9 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       10.width,
                       Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
+                            borderRadius: BorderRadius.circular(10)),
                         width: MediaQuery.of(context).size.width * 0.7,
                         height: MediaQuery.of(context).size.height * 0.07,
                         child: TextField(
