@@ -1,9 +1,11 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:g_route/constants/app_colors.dart';
 import 'package:g_route/screens/home_screen/widget/grid_item.dart';
 import 'package:g_route/screens/sales_order_management/sales_order_management_screen.dart';
 import 'package:g_route/screens/start_of_day/start_of_day_screen.dart';
 import 'package:g_route/utils/app_navigator.dart';
+import 'package:g_route/utils/app_snackbar.dart';
 import 'package:g_route/widgets/bottom_line_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,6 +20,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    Future.delayed(Duration.zero, () {
+      showAwesomeSnackbar(
+        context: context,
+        title: "Success",
+        message: "You are logged in successfully.",
+        contentType: ContentType.success,
+      );
+      return;
+    });
     items = [
       GridItem(
         'Start of Day',

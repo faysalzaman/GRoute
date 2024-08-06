@@ -1,12 +1,15 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:g_route/constants/app_colors.dart';
 import 'package:g_route/cubit/auth_cubit/auth_cubit.dart';
 import 'package:g_route/cubit/auth_cubit/auth_state.dart';
 import 'package:g_route/screens/home_screen/home_screen.dart';
+import 'package:g_route/utils/app_loading.dart';
 import 'package:g_route/utils/app_navigator.dart';
+import 'package:g_route/utils/app_snackbar.dart';
 import 'package:g_route/widgets/bottom_line_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -211,9 +214,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     listener: (context, state) {
                       if (state is AuthSuccess) {
                         AppNavigator.replaceAll(
-                            context: context, screen: const HomeScreen());
+                          context: context,
+                          screen: const HomeScreen(),
+                        );
                       } else if (state is AuthFailed) {
-                        toast(state.error);
+                        showAwesomeSnackbar(
+                          context: context,
+                          title: "Failed",
+                          message: state.error
+                              .toString()
+                              .replaceAll("Exception:", ""),
+                          contentType: ContentType.failure,
+                        );
+                        return;
                       }
                     },
                     builder: (context, state) {
@@ -227,7 +240,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {
                             if (_loginIdController.text.isEmpty ||
                                 _passwordController.text.isEmpty) {
-                              toast("Please enter Login ID and Password");
+                              showAwesomeSnackbar(
+                                context: context,
+                                title: "Warning!",
+                                message: "Please enter Login ID and Password",
+                                contentType: ContentType.warning,
+                              );
                               return;
                             }
 
@@ -237,12 +255,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           },
                           child: state is AuthLoading
-                              ? const Center(
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
+                              ? Center(
+                                  child: AppLoading.spinkitLoading(
+                                      Colors.white, 30),
                                 )
                               : const Text(
                                   'Login',
