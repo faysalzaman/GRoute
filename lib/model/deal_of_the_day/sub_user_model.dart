@@ -1,7 +1,8 @@
-class LoginModel {
+class SubUserModel {
   String? id;
   String? memberId;
   String? email;
+  String? password;
   String? name;
   String? gsrnIdNumber;
   String? mobileNumber;
@@ -11,10 +12,11 @@ class LoginModel {
   String? createdAt;
   String? updatedAt;
 
-  LoginModel({
+  SubUserModel({
     this.id,
     this.memberId,
     this.email,
+    this.password,
     this.name,
     this.gsrnIdNumber,
     this.mobileNumber,
@@ -25,10 +27,11 @@ class LoginModel {
     this.updatedAt,
   });
 
-  LoginModel.fromJson(Map<String, dynamic> json) {
+  SubUserModel.fromJson(Map<String, dynamic> json) {
     id = json['id'].toString();
     memberId = json['memberId'].toString();
     email = json['email'].toString();
+    password = json['password'].toString();
     name = json['name'].toString();
     gsrnIdNumber = json['gsrnIdNumber'].toString();
     mobileNumber = json['mobileNumber'].toString();
@@ -44,6 +47,7 @@ class LoginModel {
     data['id'] = id;
     data['memberId'] = memberId;
     data['email'] = email;
+    data['password'] = password;
     data['name'] = name;
     data['gsrnIdNumber'] = gsrnIdNumber;
     data['mobileNumber'] = mobileNumber;

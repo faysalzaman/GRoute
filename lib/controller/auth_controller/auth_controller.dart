@@ -16,10 +16,10 @@ class AuthController {
 
     final response = await http.post(url, headers: headers, body: body);
 
+    var data = jsonDecode(response.body);
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return LoginModel.fromJson(jsonDecode(response.body));
+      return LoginModel.fromJson(data['user']);
     } else {
-      var data = jsonDecode(response.body);
       throw Exception(data['message']);
     }
   }
