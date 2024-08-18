@@ -19,7 +19,7 @@ class ViewedAssignedRoutesScreen extends StatefulWidget {
 class _ViewedAssignedRoutesScreenState
     extends State<ViewedAssignedRoutesScreen> {
   DeliveryAssignmentCubit delivery = DeliveryAssignmentCubit();
-  GoogleMapController? _mapController;
+  GoogleMapController? mapController;
   final Set<Polygon> _polygons = {};
   final Set<Circle> _circles = {};
 
@@ -30,7 +30,7 @@ class _ViewedAssignedRoutesScreenState
   }
 
   void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
+    mapController = controller;
   }
 
   @override
