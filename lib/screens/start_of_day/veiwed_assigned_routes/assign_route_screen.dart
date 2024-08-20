@@ -3,7 +3,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/unload_items_screen.dart';
 import 'package:g_route/utils/app_loading.dart';
 import 'package:g_route/utils/app_navigator.dart';
-import 'package:g_route/widgets/bottom_line_widget.dart';
 import 'package:g_route/widgets/info_row_widget.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -11,9 +10,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:g_route/constants/app_colors.dart';
 import 'package:g_route/model/deal_of_the_day/orders_model.dart';
 import 'package:intl/intl.dart';
-import 'package:nb_utils/nb_utils.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:nb_utils/nb_utils.dart';
 
 class AssignRouteScreen extends StatefulWidget {
   const AssignRouteScreen({super.key, required this.ordersModel});
@@ -30,6 +30,7 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
   LatLng? _destinationLocation;
   bool _journeyStarted = false;
   bool _isLoading = true;
+  bool _isJourneyLoading = false;
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {};
   double _distanceInKm = 0.0;
@@ -154,13 +155,13 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
     return points;
   }
 
-  void _startJourney() {
+  void _startJourney() async {
     setState(() {
-      _journeyStarted = true;
+      _isJourneyLoading = true;
     });
 
     // Draw the route
-    _drawRoute();
+    await _drawRoute();
 
     // Listen to location updates
     Location location = Location();
@@ -172,6 +173,11 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
 
       // Redraw the route with the new location
       _drawRoute();
+    });
+
+    setState(() {
+      _journeyStarted = true;
+      _isJourneyLoading = false;
     });
   }
 
@@ -213,109 +219,104 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
           ? Center(
               child: AppLoading.spinkitLoading(AppColors.primaryColor, 50),
             ) // Show a loader while initializing
-          : Column(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          height: context.height() * 0.48,
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.primaryColor),
-                          ),
-                          child: GoogleMap(
-                            onMapCreated: (controller) {
-                              mapController = controller;
-                            },
-                            initialCameraPosition: CameraPosition(
-                              target: _currentLocation!,
-                              zoom: 14,
-                            ),
-                            markers: _markers,
-                            polylines: _polylines,
-                            myLocationEnabled: true,
-                            myLocationButtonEnabled: true,
-                            trafficEnabled: true,
-                          ),
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: context.height() * 0.45,
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.primaryColor),
+                      ),
+                      child: GoogleMap(
+                        onMapCreated: (controller) {
+                          mapController = controller;
+                        },
+                        initialCameraPosition: CameraPosition(
+                          target: _currentLocation!,
+                          zoom: 14,
                         ),
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.primaryColor),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              InfoRow(
-                                label: 'Picking Route ID:',
-                                value: widget.ordersModel.pickingRouteId
-                                    .toString(),
-                              ),
-                              const SizedBox(height: 10),
-                              InfoRow(
-                                label: 'Inventory Location ID:',
-                                value: widget.ordersModel.inventLocationId
-                                    .toString(),
-                              ),
-                              const SizedBox(height: 10),
-                              InfoRow(
-                                label: 'Date Assigned:',
-                                value: DateFormat('dd/MM/yyyy').format(
-                                  DateTime.parse(
-                                      widget.ordersModel.createdAt.toString()),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              InfoRow(
-                                label: 'WMS Location:',
-                                value:
-                                    widget.ordersModel.wmsLocationId.toString(),
-                              ),
-                              const SizedBox(height: 10),
-                              InfoRow(
-                                label: 'Distance:',
-                                value: '${_distanceInKm.toStringAsFixed(2)} km',
-                              ),
-                              const SizedBox(height: 10),
-                              const InfoRow(
-                                label: 'Duration:',
-                                value:
-                                    '2 days  6 hours', // You should calculate this dynamically
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        GestureDetector(
-                          onTap: _journeyStarted ? _arrive : _startJourney,
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
-                            padding: const EdgeInsets.all(5),
-                            height: 50,
-                            width: double.infinity,
-                            decoration: const BoxDecoration(
-                              color: AppColors.primaryColor,
-                            ),
-                            child: Center(
-                              child: Text(
-                                _journeyStarted ? "Arrived" : "Start Journey",
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                        markers: _markers,
+                        polylines: _polylines,
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
+                        trafficEnabled: true,
+                      ),
                     ),
-                  ),
+                    10.height,
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.primaryColor),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          InfoRow(
+                            label: 'Picking Route ID:',
+                            value: widget.ordersModel.pickingRouteId.toString(),
+                          ),
+                          10.height,
+                          InfoRow(
+                            label: 'Inventory Location ID:',
+                            value:
+                                widget.ordersModel.inventLocationId.toString(),
+                          ),
+                          const SizedBox(height: 10),
+                          InfoRow(
+                            label: 'Date Assigned:',
+                            value: DateFormat('dd/MM/yyyy').format(
+                              DateTime.parse(
+                                  widget.ordersModel.createdAt.toString()),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          InfoRow(
+                            label: 'WMS Location:',
+                            value: widget.ordersModel.wmsLocationId.toString(),
+                          ),
+                          const SizedBox(height: 10),
+                          InfoRow(
+                            label: 'Distance:',
+                            value: '${_distanceInKm.toStringAsFixed(2)} km',
+                          ),
+                          const SizedBox(height: 10),
+                          const InfoRow(
+                            label: 'Duration:',
+                            value:
+                                '2 days  6 hours', // You should calculate this dynamically
+                          ),
+                        ],
+                      ),
+                    ),
+                    10.height,
+                    GestureDetector(
+                      onTap: _journeyStarted ? _arrive : _startJourney,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.all(5),
+                        height: 50,
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryColor,
+                        ),
+                        child: Center(
+                          child: _isJourneyLoading
+                              ? AppLoading.spinkitLoading(Colors.white, 30)
+                              : Text(
+                                  _journeyStarted ? "Arrived" : "Start Journey",
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const BottomLineWidget(),
-              ],
+              ),
             ),
     );
   }

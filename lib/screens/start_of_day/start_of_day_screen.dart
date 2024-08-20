@@ -3,6 +3,7 @@ import 'package:g_route/constants/app_colors.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/viewed_assigned_routes_screen.dart';
 import 'package:g_route/utils/app_navigator.dart';
 import 'package:g_route/widgets/bottom_line_widget.dart';
+import 'package:g_route/widgets/grid_item_2_widget.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class StartOfDayScreen extends StatefulWidget {
@@ -87,6 +88,7 @@ class _StartOfDayScreenState extends State<StartOfDayScreen> {
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 10,
+                        mainAxisSpacing: 0,
                         childAspectRatio: 2 / 1.5,
                       ),
                       itemCount: items!.length,
@@ -102,71 +104,6 @@ class _StartOfDayScreenState extends State<StartOfDayScreen> {
           const BottomLineWidget(),
         ],
       ),
-    );
-  }
-}
-
-class GridItem {
-  final String title;
-  final String icon;
-  final void Function()? onTap;
-
-  GridItem(
-    this.title,
-    this.icon,
-    this.onTap,
-  );
-}
-
-class GridItemWidget2 extends StatelessWidget {
-  final GridItem item;
-
-  const GridItemWidget2({super.key, required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          height: context.height() * 0.15,
-          width: context.width() * 0.5,
-          child: Card(
-            color: Colors.white,
-            elevation: 5,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: InkWell(
-              onTap: item.onTap,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    item.icon,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    item.title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

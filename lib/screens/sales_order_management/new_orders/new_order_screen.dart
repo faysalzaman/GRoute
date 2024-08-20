@@ -112,7 +112,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     children: [
                       Container(
                         margin: const EdgeInsets.symmetric(vertical: 10),
-                        width: MediaQuery.of(context).size.width * 0.4,
+                        width: MediaQuery.of(context).size.width * 0.35,
                         height: MediaQuery.of(context).size.height * 0.05,
                         decoration: BoxDecoration(
                           color: Colors.green,
@@ -127,7 +127,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                                 'View Line Item',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 13,
+                                  fontSize: 10,
                                 ),
                               ),
                               Container(
@@ -140,7 +140,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                                 child: const Text(
                                   "99",
                                   style: TextStyle(
-                                      color: Colors.white, fontSize: 15),
+                                      color: Colors.white, fontSize: 12),
                                 ),
                               ),
                             ],
@@ -169,10 +169,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                           const Text(
                             "Total",
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 13,
                             ),
                           ),
-                          10.width,
+                          5.width,
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 5),
                             decoration: BoxDecoration(
@@ -183,7 +183,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                               "999999",
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 15,
+                                fontSize: 13,
                               ),
                             ),
                           )
