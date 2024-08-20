@@ -4,6 +4,7 @@ import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/unload_items
 import 'package:g_route/utils/app_loading.dart';
 import 'package:g_route/utils/app_navigator.dart';
 import 'package:g_route/widgets/bottom_line_widget.dart';
+import 'package:g_route/widgets/info_row_widget.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:geolocator/geolocator.dart';
@@ -316,42 +317,6 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
                 const BottomLineWidget(),
               ],
             ),
-    );
-  }
-}
-
-class InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const InfoRow({super.key, required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.primaryColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 2,
-          child: Text(
-            value,
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 12,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
