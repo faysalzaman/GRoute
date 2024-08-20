@@ -5,7 +5,7 @@ void showAwesomeSnackbar({
   required BuildContext context,
   required String title,
   required String message,
-  required ContentType contentType,
+  ContentType? contentType,
 }) {
   final snackBar = SnackBar(
     elevation: 0,
@@ -14,7 +14,7 @@ void showAwesomeSnackbar({
     content: AwesomeSnackbarContent(
       title: title,
       message: message,
-      contentType: contentType,
+      contentType: contentType ?? ContentType.success,
     ),
   );
 

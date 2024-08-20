@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/assign_route_screen.dart';
+import 'package:g_route/utils/app_loading.dart';
+import 'package:g_route/utils/app_navigator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:g_route/constants/app_colors.dart';
 import 'package:g_route/cubit/delivery_assignment/delivery_assignment_cubit.dart';
@@ -31,6 +34,13 @@ class _ViewedAssignedRoutesScreenState
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
+  }
+
+  @override
+  void dispose() {
+    mapController?.dispose();
+    delivery.close(); // Close the cubit if it's not used elsewhere
+    super.dispose();
   }
 
   @override
@@ -113,28 +123,79 @@ class _ViewedAssignedRoutesScreenState
                               border: Border.all(color: AppColors.primaryColor),
                             ),
                             child: ListView.separated(
-                              itemCount: 4,
+                              itemCount:
+                                  state.deliveryAssignments.orders!.length,
                               shrinkWrap: true,
                               separatorBuilder: (context, index) => 10.height,
                               itemBuilder: (context, index) {
-                                return Material(
-                                  elevation: 5,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(5),
-                                    width: context.width() * 0.8,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      border: Border.all(),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(child: Text("${index + 1}")),
-                                        const Expanded(
-                                          flex: 3,
-                                          child: Text("SKR239w9er0wq99827382"),
-                                        ),
-                                      ],
+                                return GestureDetector(
+                                  onTap: () {
+                                    AppNavigator.goToPage(
+                                      context: context,
+                                      screen: AssignRouteScreen(
+                                        ordersModel: state
+                                            .deliveryAssignments.orders![index],
+                                      ),
+                                    );
+                                  },
+                                  child: Material(
+                                    elevation: 5,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(5),
+                                      width: context.width() * 0.8,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        border: Border.all(),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(child: Text("${index + 1}")),
+                                          Expanded(
+                                            flex: 2,
+                                            child: Text(
+                                              state
+                                                  .deliveryAssignments
+                                                  .orders![index]
+                                                  .customerProfile!
+                                                  .customerName
+                                                  .toString(),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              state.deliveryAssignments
+                                                          .orders![index].status
+                                                          .toString() ==
+                                                      "pending"
+                                                  ? "Pending"
+                                                  : state
+                                                              .deliveryAssignments
+                                                              .orders![index]
+                                                              .status
+                                                              .toString() ==
+                                                          "out for delivery"
+                                                      ? "Out for delivery"
+                                                      : "Delivered",
+                                              style: TextStyle(
+                                                color: state
+                                                            .deliveryAssignments
+                                                            .orders![index]
+                                                            .status ==
+                                                        'delivered'
+                                                    ? Colors.green
+                                                    : state
+                                                                .deliveryAssignments
+                                                                .orders![index]
+                                                                .status ==
+                                                            'out for delivery'
+                                                        ? Colors.orange
+                                                        : Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );
@@ -191,13 +252,8 @@ class _ViewedAssignedRoutesScreenState
             );
           }
           if (state is DeliveryAssignmentLoading) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primaryColor,
-                strokeCap: StrokeCap.round,
-                strokeWidth: 10,
-              ),
-            );
+            return Center(
+                child: AppLoading.spinkitLoading(AppColors.primaryColor, 50));
           }
           if (state is DeliveryAssignmentError) {
             return Center(
@@ -205,7 +261,10 @@ class _ViewedAssignedRoutesScreenState
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   state.message,
-                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 20,
+                  ),
                 ),
               ),
             );
