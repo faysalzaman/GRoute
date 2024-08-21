@@ -3,8 +3,16 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:g_route/constants/app_colors.dart';
+import 'package:g_route/cubit/delivery_assignment/delivery_assignment_cubit.dart';
+import 'package:g_route/cubit/image/image_cubit.dart';
+import 'package:g_route/cubit/image/image_state.dart';
+import 'package:g_route/cubit/sales_order_detail/sales_order_detail_cubit.dart';
+import 'package:g_route/cubit/sales_order_detail/sales_order_detail_state.dart';
+import 'package:g_route/model/deal_of_the_day/sales_order_detail_model.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/signature_screen.dart';
+import 'package:g_route/utils/app_loading.dart';
 import 'package:g_route/utils/app_navigator.dart';
 import 'package:g_route/utils/app_snackbar.dart';
 import 'package:g_route/widgets/bottom_line_widget.dart';
@@ -12,7 +20,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class UnloadItemsScreen extends StatefulWidget {
-  const UnloadItemsScreen({super.key});
+  const UnloadItemsScreen({
+    super.key,
+    required this.index,
+  });
+
+  final int index;
 
   @override
   State<UnloadItemsScreen> createState() => _UnloadItemsScreenState();
@@ -27,10 +40,21 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
 
   late TabController _tabController;
 
+  SalesOrderDetailCubit salesOrderDetailCubit = SalesOrderDetailCubit();
+  List<SalesOrderDetailModel> table = [];
+
+  ImageCubit imageCubit = ImageCubit();
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    salesOrderDetailCubit.getSalesOrderDetail(
+        DeliveryAssignmentCubit.get(context)
+            .deliveryAssignmentModel!
+            .orders![widget.index]
+            .tblSalesOrderId
+            .toString());
   }
 
   Future<void> pickImage() async {
@@ -118,56 +142,87 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.red), // Red border
-              borderRadius: BorderRadius.circular(10),
-            ),
-            margin: const EdgeInsets.symmetric(horizontal: 5),
-            child: SingleChildScrollView(
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  cardColor:
-                      Colors.white, // Set table background color to white
-                  dataTableTheme: DataTableThemeData(
-                    headingRowColor: MaterialStateColor.resolveWith(
-                      (states) => Colors.pink,
-                    ), // Set header color to pink
-                    headingTextStyle: const TextStyle(
-                      color: Colors.white, // Set header text color to white
-                      fontWeight: FontWeight.bold,
-                    ),
-                    dataRowColor: MaterialStateColor.resolveWith(
-                        (states) => Colors.white), // Set row color to white
-                    dataTextStyle: const TextStyle(color: Colors.black),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Colors.red), // Set table border to red
+          BlocConsumer<SalesOrderDetailCubit, SalesOrderDetailState>(
+            bloc: salesOrderDetailCubit,
+            listener: (context, state) {
+              if (state is SalesOrderDetailLoaded) {
+                table = state.salesOrderDetail;
+              }
+            },
+            builder: (context, state) {
+              if (state is SalesOrderDetailLoading) {
+                return Center(
+                  child: AppLoading.spinkitLoading(AppColors.primaryColor, 50),
+                );
+              }
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.red), // Red border
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  child: SizedBox(
+                    width: MediaQuery.of(context)
+                        .size
+                        .width, // Ensure the table fits within the screen
+
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        cardColor: Colors
+                            .white, // Set the background color of the table to white
+                        dataTableTheme: DataTableThemeData(
+                          headingRowColor: MaterialStateColor.resolveWith(
+                            (states) => Colors.pink,
+                          ),
+                          headingTextStyle: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          dataRowColor: MaterialStateColor.resolveWith(
+                            (states) => Colors
+                                .white, // Set row background color to white
+                          ),
+                        ),
+                      ),
+                      child: PaginatedDataTable(
+                        // header: const Text('Sales Order Details'),
+                        rowsPerPage: 4, // Show 5 items per page
+                        columns: const [
+                          // DataColumn(label: Text('ID')),
+                          DataColumn(label: Text('RP Doc No')),
+                          DataColumn(label: Text('Date Time Created')),
+                          DataColumn(label: Text('SO Ref Code No')),
+                          DataColumn(label: Text('SO Item Code')),
+                          DataColumn(label: Text('SO Item Description')),
+                          DataColumn(label: Text('SO Order Qty')),
+                          DataColumn(label: Text('SO Item Unit')),
+                          DataColumn(label: Text('SO Item Price')),
+                          DataColumn(label: Text('SO Customer No')),
+                          DataColumn(label: Text('SO Already Selected')),
+                          DataColumn(label: Text('SO Item Free Qty')),
+                          DataColumn(label: Text('SO Total Amount Price')),
+                          DataColumn(label: Text('SO Total Amount Net Price')),
+                          DataColumn(label: Text('SO Total Vat Amount')),
+                          DataColumn(label: Text('SO Total Discount Amount')),
+                          DataColumn(label: Text('SO Remarks')),
+                          DataColumn(label: Text('Order')),
+                        ],
+                        source: _DataSource(table, context),
+                      ),
                     ),
                   ),
                 ),
-                child: PaginatedDataTable(
-                  columns: const [
-                    DataColumn(label: Text('ItemCode')),
-                    DataColumn(label: Text('ItemDesc')),
-                    DataColumn(label: Text('GTIN')),
-                    DataColumn(label: Text('Remarks')),
-                  ],
-                  source: _DataSource(),
-                  rowsPerPage: 5,
-                  columnSpacing: 20,
-                  horizontalMargin: 10,
-                  showCheckboxColumn: false,
-                ),
-              ),
-            ),
+              );
+            },
           ),
           const SizedBox(height: 16),
           GestureDetector(
             onTap: () {
               AppNavigator.goToPage(
                 context: context,
-                screen: const SignatureScreen(),
+                screen: SignatureScreen(index: widget.index),
               );
             },
             child: Container(
@@ -297,50 +352,90 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
             ),
           ),
           10.height,
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: pickImage,
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                padding: const EdgeInsets.all(5),
-                height: 40,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryColor,
-                ),
-                child: const Center(
-                  child: Text(
-                    "Capture Image",
-                    style: TextStyle(color: Colors.white),
-                  ),
+          GestureDetector(
+            onTap: pickImage,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.all(5),
+              height: 40,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: AppColors.primaryColor,
+              ),
+              child: const Center(
+                child: Text(
+                  "Capture Image",
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ),
           ),
-          50.height,
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                padding: const EdgeInsets.all(5),
-                height: 40,
-                width: 100,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryColor,
-                ),
-                child: const Center(
-                  child: Text(
-                    "Back",
-                    style: TextStyle(color: Colors.white),
+          10.height,
+          BlocConsumer<ImageCubit, ImageState>(
+            bloc: imageCubit,
+            listener: (context, state) {
+              if (state is ImageError) {
+                showAwesomeSnackbar(
+                  context: context,
+                  title: "Error",
+                  message: state.message,
+                );
+              }
+              if (state is ImageLoaded) {
+                showAwesomeSnackbar(
+                  context: context,
+                  title: "Saved",
+                  message: "Image saved successfully",
+                );
+
+                // clear images
+                setState(() {
+                  images!.clear();
+                });
+
+                // and goes back to the 0th tab
+                _tabController.animateTo(0);
+              }
+            },
+            builder: (context, state) {
+              return GestureDetector(
+                onTap: () async {
+                  // Assuming images is a List<XFile>
+                  if (images != null && images!.isNotEmpty) {
+                    List<File> files =
+                        images!.map((e) => File(e.path)).toList();
+
+                    // Call the method with converted files
+                    imageCubit.postImage(
+                      files,
+                      DeliveryAssignmentCubit.get(context)
+                          .deliveryAssignmentModel!
+                          .orders![widget.index]
+                          .tblSalesOrderId
+                          .toString(),
+                      "Image",
+                    );
+                  }
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(5),
+                  height: 40,
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryColor,
+                  ),
+                  child: Center(
+                    child: state is ImageLoading
+                        ? AppLoading.spinkitLoading(Colors.white, 30)
+                        : const Text(
+                            "Save Image",
+                            style: TextStyle(color: Colors.white),
+                          ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ],
       ),
@@ -349,35 +444,45 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
 }
 
 class _DataSource extends DataTableSource {
-  final List<Map<String, dynamic>> _data = List.generate(
-    15,
-    (index) => {
-      "ItemCode": "834AB4",
-      "ItemDesc": "1",
-      "GTIN": "2099756752",
-      "Remarks": "4",
-    },
-  );
+  final List<SalesOrderDetailModel> _data;
+  final BuildContext context;
+
+  _DataSource(this._data, this.context);
 
   @override
-  DataRow getRow(int index) {
-    assert(index >= 0);
-    final Map<String, dynamic> row = _data[index];
+  DataRow? getRow(int index) {
+    final SalesOrderDetailModel e = _data[index];
     return DataRow.byIndex(
       index: index,
       cells: [
-        DataCell(Text(row['ItemCode'].toString())),
-        DataCell(Text(row['ItemDesc'].toString())),
-        DataCell(Text(row['GTIN'].toString())),
-        DataCell(Text(row['Remarks'].toString())),
+        // DataCell(Text(e.id.toString())),
+        DataCell(Text(e.rPDocNo.toString())),
+        DataCell(Text(e.dateTimeCreated.toString())),
+        DataCell(Text(e.sORefCodeNo.toString())),
+        DataCell(Text(e.sOItemCode.toString())),
+        DataCell(Text(e.sOItemDescription.toString())),
+        DataCell(Text(e.sOOrderQty.toString())),
+        DataCell(Text(e.sOItemUnit.toString())),
+        DataCell(Text(e.sOItemPrice.toString())),
+        DataCell(Text(e.sOCustomerNo.toString())),
+        DataCell(Text(e.sOAlreadySelected.toString())),
+        DataCell(Text(e.sOItemFreeQty.toString())),
+        DataCell(Text(e.sOTotalAmountPrice.toString())),
+        DataCell(Text(e.sOTotalAmountNetPrice.toString())),
+        DataCell(Text(e.sOTotalVatAmount.toString())),
+        DataCell(Text(e.sOTotalDiscountAmount.toString())),
+        DataCell(Text(e.sORemarks.toString())),
+        DataCell(Text(e.order.toString())),
       ],
     );
   }
 
   @override
-  bool get isRowCountApproximate => false;
-  @override
   int get rowCount => _data.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
   @override
   int get selectedRowCount => 0;
 }

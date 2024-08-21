@@ -21,7 +21,6 @@ class ViewedAssignedRoutesScreen extends StatefulWidget {
 
 class _ViewedAssignedRoutesScreenState
     extends State<ViewedAssignedRoutesScreen> {
-  DeliveryAssignmentCubit delivery = DeliveryAssignmentCubit();
   GoogleMapController? mapController;
   final Set<Polygon> _polygons = {};
   final Set<Circle> _circles = {};
@@ -29,7 +28,7 @@ class _ViewedAssignedRoutesScreenState
   @override
   void initState() {
     super.initState();
-    delivery.getDeliveryAssignments();
+    DeliveryAssignmentCubit.get(context).getDeliveryAssignments();
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -39,7 +38,6 @@ class _ViewedAssignedRoutesScreenState
   @override
   void dispose() {
     mapController?.dispose();
-    delivery.close(); // Close the cubit if it's not used elsewhere
     super.dispose();
   }
 
@@ -67,9 +65,12 @@ class _ViewedAssignedRoutesScreenState
         ),
       ),
       body: BlocConsumer<DeliveryAssignmentCubit, DeliveryAssignmentState>(
-        bloc: delivery,
         listener: (context, state) {},
         builder: (context, state) {
+          if (!mounted) {
+            return const SizedBox(); // Prevents build if not mounted
+          }
+
           if (state is DeliveryAssignmentLoaded) {
             var deliveryAssignments = state.deliveryAssignments;
             String routeArea =
@@ -130,11 +131,13 @@ class _ViewedAssignedRoutesScreenState
                               itemBuilder: (context, index) {
                                 return GestureDetector(
                                   onTap: () {
+                                    print(state
+                                        .deliveryAssignments.orders![index]);
                                     AppNavigator.goToPage(
                                       context: context,
                                       screen: AssignRouteScreen(
-                                        ordersModel: state
-                                            .deliveryAssignments.orders![index],
+                                        index: index,
+                                        buttonText: 'Start Journey',
                                       ),
                                     );
                                   },

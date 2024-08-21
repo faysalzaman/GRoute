@@ -1,24 +1,26 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/unload_items_screen.dart';
-import 'package:g_route/utils/app_loading.dart';
-import 'package:g_route/utils/app_navigator.dart';
-import 'package:g_route/widgets/info_row_widget.dart';
+import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/journey_screen.dart';
+import 'package:g_route/cubit/delivery_assignment/delivery_assignment_cubit.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:g_route/widgets/info_row_widget.dart';
 import 'package:g_route/constants/app_colors.dart';
-import 'package:g_route/model/deal_of_the_day/orders_model.dart';
-import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-
+import 'package:g_route/utils/app_navigator.dart';
+import 'package:g_route/utils/app_loading.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class AssignRouteScreen extends StatefulWidget {
-  const AssignRouteScreen({super.key, required this.ordersModel});
+  const AssignRouteScreen({
+    super.key,
+    required this.buttonText,
+    required this.index,
+  });
 
-  final OrdersModel ordersModel;
+  final String buttonText;
+  final int index;
 
   @override
   State<AssignRouteScreen> createState() => _AssignRouteScreenState();
@@ -28,9 +30,7 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
   GoogleMapController? mapController;
   LatLng? _currentLocation;
   LatLng? _destinationLocation;
-  bool _journeyStarted = false;
   bool _isLoading = true;
-  bool _isJourneyLoading = false;
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {};
   double _distanceInKm = 0.0;
@@ -45,12 +45,26 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
     Location location = Location();
     LocationData locationData = await location.getLocation();
 
+    if (!mounted) return; // Exit if the widget is no longer in the tree
+
     setState(() {
       _currentLocation =
           LatLng(locationData.latitude!, locationData.longitude!);
       _destinationLocation = LatLng(
-        double.parse(widget.ordersModel.customerProfile!.latitude.toString()),
-        double.parse(widget.ordersModel.customerProfile!.longitude.toString()),
+        double.parse(DeliveryAssignmentCubit.get(context)
+            .deliveryAssignmentModel!
+            .orders![widget.index]
+            .customerProfile!
+            .latitude
+            .toString()),
+        double.parse(
+          DeliveryAssignmentCubit.get(context)
+              .deliveryAssignmentModel!
+              .orders![widget.index]
+              .customerProfile!
+              .longitude
+              .toString(),
+        ),
       );
 
       // Calculate the distance
@@ -70,6 +84,8 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
   }
 
   void _calculateDistance() {
+    if (!mounted) return; // Exit if the widget is no longer in the tree
+
     setState(() {
       _distanceInKm = Geolocator.distanceBetween(
             _currentLocation!.latitude,
@@ -79,111 +95,6 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
           ) /
           1000; // Convert to kilometers
     });
-  }
-
-  Future<void> _drawRoute() async {
-    if (_destinationLocation == null || _currentLocation == null) return;
-
-    final String? googleAPIKey = dotenv.env['FLUTTER_APP_GOOGLE_MAP_API_KEY'];
-    final String url =
-        'https://maps.googleapis.com/maps/api/directions/json?origin=${_currentLocation!.latitude},${_currentLocation!.longitude}&destination=${_destinationLocation!.latitude},${_destinationLocation!.longitude}&key=$googleAPIKey';
-
-    final response = await http.get(Uri.parse(url));
-    final jsonData = json.decode(response.body);
-
-    if (jsonData['routes'].isNotEmpty) {
-      setState(() {
-        _polylines.clear();
-        List<LatLng> routePoints = [];
-
-        // Fetch the points along the route
-        for (var step in jsonData['routes'][0]['legs'][0]['steps']) {
-          var points = step['polyline']['points'];
-          routePoints.addAll(_convertToLatLng(_decodePolyline(points)));
-        }
-
-        _polylines.add(
-          Polyline(
-            polylineId: const PolylineId('route'),
-            points: routePoints,
-            color: Colors.blue,
-            width: 5,
-          ),
-        );
-      });
-    }
-  }
-
-  List<LatLng> _convertToLatLng(List<dynamic> points) {
-    List<LatLng> result = [];
-    for (var point in points) {
-      result.add(LatLng(point['lat'], point['lng']));
-    }
-    return result;
-  }
-
-  List<dynamic> _decodePolyline(String polyline) {
-    List<dynamic> points = [];
-    int index = 0;
-    int len = polyline.length;
-    int lat = 0;
-    int lng = 0;
-
-    while (index < len) {
-      int b, shift = 0, result = 0;
-      do {
-        b = polyline.codeUnitAt(index++) - 63;
-        result |= (b & 0x1F) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-      lat += dlat;
-
-      shift = 0;
-      result = 0;
-      do {
-        b = polyline.codeUnitAt(index++) - 63;
-        result |= (b & 0x1F) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-      lng += dlng;
-
-      points.add({'lat': lat / 1E5, 'lng': lng / 1E5});
-    }
-
-    return points;
-  }
-
-  void _startJourney() async {
-    setState(() {
-      _isJourneyLoading = true;
-    });
-
-    // Draw the route
-    await _drawRoute();
-
-    // Listen to location updates
-    Location location = Location();
-    location.onLocationChanged.listen((LocationData currentLocation) {
-      setState(() {
-        _currentLocation =
-            LatLng(currentLocation.latitude!, currentLocation.longitude!);
-      });
-
-      // Redraw the route with the new location
-      _drawRoute();
-    });
-
-    setState(() {
-      _journeyStarted = true;
-      _isJourneyLoading = false;
-    });
-  }
-
-  void _arrive() {
-    // Redirect to another screen when the "Arrive" button is pressed
-    AppNavigator.replaceTo(context: context, screen: const UnloadItemsScreen());
   }
 
   @override
@@ -258,26 +169,40 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
                         children: [
                           InfoRow(
                             label: 'Picking Route ID:',
-                            value: widget.ordersModel.pickingRouteId.toString(),
+                            value: DeliveryAssignmentCubit.get(context)
+                                .deliveryAssignmentModel!
+                                .orders![widget.index]
+                                .pickingRouteId
+                                .toString(),
                           ),
                           10.height,
                           InfoRow(
-                            label: 'Inventory Location ID:',
-                            value:
-                                widget.ordersModel.inventLocationId.toString(),
-                          ),
+                              label: 'Inventory Location ID:',
+                              value: DeliveryAssignmentCubit.get(context)
+                                  .deliveryAssignmentModel!
+                                  .orders![widget.index]
+                                  .inventLocationId
+                                  .toString()),
                           const SizedBox(height: 10),
                           InfoRow(
                             label: 'Date Assigned:',
                             value: DateFormat('dd/MM/yyyy').format(
                               DateTime.parse(
-                                  widget.ordersModel.createdAt.toString()),
+                                  DeliveryAssignmentCubit.get(context)
+                                      .deliveryAssignmentModel!
+                                      .orders![widget.index]
+                                      .createdAt
+                                      .toString()),
                             ),
                           ),
                           const SizedBox(height: 10),
                           InfoRow(
                             label: 'WMS Location:',
-                            value: widget.ordersModel.wmsLocationId.toString(),
+                            value: DeliveryAssignmentCubit.get(context)
+                                .deliveryAssignmentModel!
+                                .orders![widget.index]
+                                .wmsLocationId
+                                .toString(),
                           ),
                           const SizedBox(height: 10),
                           InfoRow(
@@ -295,7 +220,14 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
                     ),
                     10.height,
                     GestureDetector(
-                      onTap: _journeyStarted ? _arrive : _startJourney,
+                      onTap: () {
+                        AppNavigator.replaceTo(
+                          context: context,
+                          screen: widget.buttonText == "Arrived"
+                              ? UnloadItemsScreen(index: widget.index)
+                              : JourneyScreen(index: widget.index),
+                        );
+                      },
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 20),
                         padding: const EdgeInsets.all(5),
@@ -305,12 +237,12 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
                           color: AppColors.primaryColor,
                         ),
                         child: Center(
-                          child: _isJourneyLoading
-                              ? AppLoading.spinkitLoading(Colors.white, 30)
-                              : Text(
-                                  _journeyStarted ? "Arrived" : "Start Journey",
-                                  style: const TextStyle(color: Colors.white),
-                                ),
+                          child: Text(
+                            widget.buttonText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
                     ),
