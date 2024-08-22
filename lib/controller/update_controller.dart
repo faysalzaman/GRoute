@@ -36,6 +36,9 @@ class OrderService {
       case OrderAction.invoiceCreationTime:
         body = {"invoiceCreationTime": currentDate};
         break;
+      case OrderAction.completed:
+        body = {"status": "completed"};
+        break;
       default:
         body = {"loadingTime": currentDate};
     }
@@ -59,4 +62,5 @@ enum OrderAction {
   endJourneyTime,
   invoiceCreationTime,
   loadingTime,
+  completed,
 }

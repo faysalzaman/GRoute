@@ -270,6 +270,18 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
                   action: OrderAction.unloadingTime,
                 );
 
+                await _orderService.updateOrderStatus(
+                  orderId: DeliveryAssignmentCubit.get(context)
+                      .deliveryAssignmentModel!
+                      .orders![widget.index]
+                      .id
+                      .toString(),
+                  currentDate: DateTime.now().toIso8601String(),
+                  action: OrderAction.completed,
+                );
+
+                DeliveryAssignmentCubit.get(context).getDeliveryAssignments();
+
                 showAwesomeSnackbar(
                   context: context,
                   title: "Delivered",
