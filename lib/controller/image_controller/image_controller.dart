@@ -1,58 +1,106 @@
-// ignore_for_file: depend_on_referenced_packages
-
+import 'dart:convert';
 import 'dart:io';
 import 'package:g_route/constants/app_urls.dart';
 import 'package:mime/mime.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:image/image.dart' as img;
+import 'package:logger/logger.dart';
 
 class ImageController {
+  static final _logger = Logger();
+
+  /// Uploads images to the server. If an image exceeds 5 MB, it is resized before uploading.
   static Future<String> uploadImage(
     List<File> images,
     String orderId,
-    String imageType,
-  ) async {
-    print(images);
-
+    String imageType, {
+    int maxSizeInBytes = 5000000, // 5 MB
+  }) async {
     var url =
         Uri.parse("${AppUrls.baseUrl}/api/v1/orders/addOrderImage/$orderId");
 
-    print("url: $url");
+    _logger.i("Uploading images to: $url");
 
     var request = http.MultipartRequest('POST', url);
 
-    for (var image in images) {
-      print('Adding image: ${image.path}');
+    try {
+      for (var image in images) {
+        // Resize the image if it exceeds the maximum size
+        File resizedImage =
+            await resizeImageIfNeeded(image, maxSizeInBytes: maxSizeInBytes);
 
-      // Reusing the getMediaType function to determine the correct MIME type
-      var multipartFile = http.MultipartFile.fromBytes(
-        imageType == "Signature" ? 'signature' : 'image',
-        await image.readAsBytes(),
-        filename: image.path.split('/').last,
-        contentType: getMediaType(image.path),
-      );
-      request.files.add(multipartFile);
-    }
+        _logger.d('Adding image: ${resizedImage.path}');
 
-    print(request.files);
+        var mimeType = getMediaType(resizedImage.path);
 
-    var response = await request.send();
-    print('Response status code: ${response.statusCode}');
+        var multipartFile = await http.MultipartFile.fromPath(
+          imageType == "Signature" ? 'signature' : 'image',
+          resizedImage.path,
+          contentType: mimeType,
+        );
 
-    // Convert the streamed response into a regular response to access the body
-    var responseBody = await http.Response.fromStream(response);
+        request.files.add(multipartFile);
+      }
 
-    // Print the response body
-    print('Response body: ${responseBody.body}');
+      var response = await request.send();
+      _logger.i('Response status code: ${response.statusCode}');
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return 'Image uploaded successfully';
-    } else {
-      return 'Failed to upload image';
+      var responseBody = await http.Response.fromStream(response);
+
+      _logger.d('Response body: ${responseBody.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return 'Image uploaded successfully';
+      } else {
+        var msg = jsonDecode(responseBody.body);
+        throw Exception(msg['error'] ?? 'Failed to upload image');
+      }
+    } catch (e) {
+      _logger.e("An error occurred while uploading the images: $e");
+      throw Exception("Image upload failed. Please try again.");
     }
   }
 
-  // Helper function to get MIME type from file extension
+  /// Resizes the image if it exceeds the specified maximum size in bytes.
+  static Future<File> resizeImageIfNeeded(File image,
+      {int maxSizeInBytes = 5000000}) async {
+    // Check if the image file size is larger than the specified max size
+    if (await image.length() > maxSizeInBytes) {
+      final imageBytes = await image.readAsBytes();
+
+      // Decode the image to determine its current size
+      img.Image? originalImage = img.decodeImage(imageBytes);
+      if (originalImage == null) {
+        throw Exception("Unable to decode image");
+      }
+
+      // Calculate the scale factor to reduce the image size
+      double scaleFactor = (maxSizeInBytes / imageBytes.length).clamp(0.0, 1.0);
+
+      // Calculate the new dimensions while maintaining the aspect ratio
+      int newWidth = (originalImage.width * scaleFactor).round();
+      int newHeight = (originalImage.height * scaleFactor).round();
+
+      // Resize the image
+      img.Image resizedImage =
+          img.copyResize(originalImage, width: newWidth, height: newHeight);
+
+      // Encode the image back to a file format
+      List<int> resizedImageBytes = img.encodeJpg(resizedImage, quality: 85);
+
+      // Save the resized image back to a file (overwriting the original)
+      File resizedImageFile = await image.writeAsBytes(resizedImageBytes);
+
+      _logger.i("Image resized to: ${resizedImageFile.lengthSync()} bytes");
+
+      return resizedImageFile;
+    } else {
+      return image; // Return the original image if resizing is not needed
+    }
+  }
+
+  /// Helper function to get MIME type from file extension
   static MediaType getMediaType(String path) {
     final mimeType = lookupMimeType(path);
     if (mimeType != null) {

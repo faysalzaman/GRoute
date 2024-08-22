@@ -174,23 +174,23 @@ class _ViewedAssignedRoutesScreenState
                                                               .orders![index]
                                                               .status
                                                               .toString() ==
-                                                          "out for delivery"
-                                                      ? "Out for delivery"
+                                                          "canceled"
+                                                      ? "Canceled"
                                                       : "Delivered",
                                               style: TextStyle(
                                                 color: state
                                                             .deliveryAssignments
                                                             .orders![index]
                                                             .status ==
-                                                        'delivered'
+                                                        'completed'
                                                     ? Colors.green
                                                     : state
                                                                 .deliveryAssignments
                                                                 .orders![index]
                                                                 .status ==
-                                                            'out for delivery'
-                                                        ? Colors.orange
-                                                        : Colors.red,
+                                                            'cancelled'
+                                                        ? Colors.red
+                                                        : Colors.orange,
                                               ),
                                             ),
                                           ),

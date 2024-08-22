@@ -1,10 +1,12 @@
-// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names, use_build_context_synchronously, unused_field
 
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:g_route/constants/app_colors.dart';
+import 'package:g_route/controller/image_controller/image_controller.dart';
+import 'package:g_route/controller/update_controller.dart';
 import 'package:g_route/cubit/delivery_assignment/delivery_assignment_cubit.dart';
 import 'package:g_route/cubit/image/image_cubit.dart';
 import 'package:g_route/cubit/image/image_state.dart';
@@ -48,6 +50,7 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
   @override
   void initState() {
     super.initState();
+
     _tabController = TabController(length: 2, vsync: this);
     salesOrderDetailCubit.getSalesOrderDetail(
         DeliveryAssignmentCubit.get(context)
@@ -85,6 +88,8 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
     _tabController.dispose();
     super.dispose();
   }
+
+  final OrderService _orderService = OrderService();
 
   @override
   Widget build(BuildContext context) {
@@ -243,13 +248,45 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
           ),
           const SizedBox(height: 8),
           GestureDetector(
-            onTap: () {
-              showAwesomeSnackbar(
-                context: context,
-                title: "Delivered",
-                message: "Items delivered successfully",
-              );
-              Navigator.of(context).pop();
+            onTap: () async {
+              try {
+                await _orderService.updateOrderStatus(
+                  orderId: DeliveryAssignmentCubit.get(context)
+                      .deliveryAssignmentModel!
+                      .orders![widget.index]
+                      .id
+                      .toString(),
+                  currentDate: DateTime.now().toIso8601String(),
+                  action: OrderAction.invoiceCreationTime,
+                );
+
+                await _orderService.updateOrderStatus(
+                  orderId: DeliveryAssignmentCubit.get(context)
+                      .deliveryAssignmentModel!
+                      .orders![widget.index]
+                      .id
+                      .toString(),
+                  currentDate: DateTime.now().toIso8601String(),
+                  action: OrderAction.unloadingTime,
+                );
+
+                showAwesomeSnackbar(
+                  context: context,
+                  title: "Delivered",
+                  message: "Items delivered successfully",
+                );
+                Navigator.of(context).pop();
+              } catch (e) {
+                // Handle error, e.g., show an error message
+                print('Failed to update order: $e');
+
+                showAwesomeSnackbar(
+                  context: context,
+                  title: "Delivered",
+                  message: "Items delivered successfully",
+                );
+                Navigator.of(context).pop();
+              }
             },
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -400,21 +437,33 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
             builder: (context, state) {
               return GestureDetector(
                 onTap: () async {
-                  // Assuming images is a List<XFile>
                   if (images != null && images!.isNotEmpty) {
-                    List<File> files =
-                        images!.map((e) => File(e.path)).toList();
+                    List<File> files = [];
 
-                    // Call the method with converted files
+                    // Resize images if needed before adding them to the files list
+                    for (var image in images!) {
+                      File file = File(image.path);
+                      File resizedFile =
+                          await ImageController.resizeImageIfNeeded(file);
+                      files.add(resizedFile);
+                    }
+
+                    // Log the files being uploaded
+                    print(
+                        "Uploading files: ${files.map((f) => f.path).join(', ')}");
+
+                    // Call the method with the resized files
                     imageCubit.postImage(
                       files,
                       DeliveryAssignmentCubit.get(context)
                           .deliveryAssignmentModel!
                           .orders![widget.index]
-                          .tblSalesOrderId
+                          .id
                           .toString(),
                       "Image",
                     );
+                  } else {
+                    print("No images to upload.");
                   }
                 },
                 child: Container(

@@ -1,3 +1,6 @@
+// ignore_for_file: unused_field
+
+import 'package:g_route/controller/update_controller.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/unload_items_screen.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/journey_screen.dart';
 import 'package:g_route/cubit/delivery_assignment/delivery_assignment_cubit.dart';
@@ -102,6 +105,8 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
     mapController?.dispose();
     super.dispose();
   }
+
+  final OrderService _orderService = OrderService();
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +225,7 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
                     ),
                     10.height,
                     GestureDetector(
-                      onTap: () {
+                      onTap: () async {
                         AppNavigator.replaceTo(
                           context: context,
                           screen: widget.buttonText == "Arrived"

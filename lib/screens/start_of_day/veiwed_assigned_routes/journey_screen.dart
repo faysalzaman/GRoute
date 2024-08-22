@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:g_route/controller/update_controller.dart';
 import 'package:g_route/cubit/delivery_assignment/delivery_assignment_cubit.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/assign_route_screen.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/full_screen_map.dart';
@@ -223,55 +224,131 @@ class _JourneyScreenState extends State<JourneyScreen> {
   }
 
   void _startJourney() async {
-    setState(() {
-      _isJourneyLoading = true;
-    });
-
-    // Draw the route
-    await _drawRoute();
-
-    if (!mounted) return; // Exit if the widget is no longer in the tree
-
-    // Listen to location updates
-    loc.Location location = loc.Location();
-    location.onLocationChanged.listen((loc.LocationData currentLocation) {
-      if (mounted) {
-        setState(() {
-          _currentLocation =
-              LatLng(currentLocation.latitude!, currentLocation.longitude!);
-        });
-
-        // Redraw the route with the new location
-        _drawRoute();
-      }
-    });
-
-    setState(() {
-      _isJourneyLoading = false;
-    });
-
-    if (mounted) {
-      AppNavigator.goToPage(
-        context: context,
-        screen: FullScreenMap(
-          currentLocation: _currentLocation!,
-          destinationLocation: _destinationLocation!,
-          markers: _markers,
-          polylines: _polylines,
-        ),
+    try {
+      await _orderService.updateOrderStatus(
+        orderId: DeliveryAssignmentCubit.get(context)
+            .deliveryAssignmentModel!
+            .orders![widget.index]
+            .id
+            .toString(),
+        currentDate: DateTime.now().toIso8601String(),
+        action: OrderAction.startJourney, // or any other action
       );
+
+      setState(() {
+        _isJourneyLoading = true;
+      });
+
+      // Draw the route
+      await _drawRoute();
+
+      if (!mounted) return; // Exit if the widget is no longer in the tree
+
+      // Listen to location updates
+      loc.Location location = loc.Location();
+      location.onLocationChanged.listen((loc.LocationData currentLocation) {
+        if (mounted) {
+          setState(() {
+            _currentLocation =
+                LatLng(currentLocation.latitude!, currentLocation.longitude!);
+          });
+
+          // Redraw the route with the new location
+          _drawRoute();
+        }
+      });
+
+      setState(() {
+        _isJourneyLoading = false;
+      });
+
+      if (mounted) {
+        AppNavigator.goToPage(
+          context: context,
+          screen: FullScreenMap(
+            currentLocation: _currentLocation!,
+            destinationLocation: _destinationLocation!,
+            markers: _markers,
+            polylines: _polylines,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Failed to update order: $e');
+      setState(() {
+        _isJourneyLoading = true;
+      });
+
+      // Draw the route
+      await _drawRoute();
+
+      if (!mounted) return; // Exit if the widget is no longer in the tree
+
+      // Listen to location updates
+      loc.Location location = loc.Location();
+      location.onLocationChanged.listen((loc.LocationData currentLocation) {
+        if (mounted) {
+          setState(() {
+            _currentLocation =
+                LatLng(currentLocation.latitude!, currentLocation.longitude!);
+          });
+
+          // Redraw the route with the new location
+          _drawRoute();
+        }
+      });
+
+      setState(() {
+        _isJourneyLoading = false;
+      });
+
+      if (mounted) {
+        AppNavigator.goToPage(
+          context: context,
+          screen: FullScreenMap(
+            currentLocation: _currentLocation!,
+            destinationLocation: _destinationLocation!,
+            markers: _markers,
+            polylines: _polylines,
+          ),
+        );
+      }
     }
   }
 
-  void _arrive() {
-    if (mounted) {
-      AppNavigator.replaceTo(
-        context: context,
-        screen: AssignRouteScreen(
-          buttonText: 'Arrived',
-          index: widget.index,
-        ),
+  void _arrive() async {
+    try {
+      await _orderService.updateOrderStatus(
+        orderId: DeliveryAssignmentCubit.get(context)
+            .deliveryAssignmentModel!
+            .orders![widget.index]
+            .id
+            .toString(),
+        currentDate: DateTime.now().toIso8601String(),
+        action: OrderAction.arrivalTime, // or any other action
       );
+
+      if (mounted) {
+        AppNavigator.replaceTo(
+          context: context,
+          screen: AssignRouteScreen(
+            buttonText: 'Arrived',
+            index: widget.index,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Failed to update order: $e');
+
+      if (mounted) {
+        AppNavigator.replaceTo(
+          context: context,
+          screen: AssignRouteScreen(
+            buttonText: 'Arrived',
+            index: widget.index,
+          ),
+        );
+      }
     }
   }
 
@@ -280,6 +357,8 @@ class _JourneyScreenState extends State<JourneyScreen> {
     mapController?.dispose();
     super.dispose();
   }
+
+  final OrderService _orderService = OrderService();
 
   @override
   Widget build(BuildContext context) {
