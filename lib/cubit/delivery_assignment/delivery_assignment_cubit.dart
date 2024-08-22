@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:g_route/controller/delivery_contorller/delivery_controller.dart';
 import 'package:g_route/cubit/delivery_assignment/delivery_assignment_state.dart';
-import 'package:g_route/model/deal_of_the_day/delivery_assignment_model.dart';
+import 'package:g_route/model/start_of_the_day/delivery_assignment_model.dart';
 import 'package:g_route/services/connectivity_services.dart';
 
 class DeliveryAssignmentCubit extends Cubit<DeliveryAssignmentState> {

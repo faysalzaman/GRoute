@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:g_route/constants/app_preferences.dart';
 import 'package:g_route/constants/app_urls.dart';
-import 'package:g_route/model/deal_of_the_day/delivery_assignment_model.dart';
+import 'package:g_route/model/start_of_the_day/delivery_assignment_model.dart';
 import 'package:http/http.dart' as http;
 
 class DeliveryController {

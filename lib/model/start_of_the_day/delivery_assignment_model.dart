@@ -1,9 +1,9 @@
 // ignore_for_file: file_names
 
-import 'package:g_route/model/deal_of_the_day/orders_model.dart';
-import 'package:g_route/model/deal_of_the_day/route_model.dart';
-import 'package:g_route/model/deal_of_the_day/sub_user_model.dart';
-import 'package:g_route/model/deal_of_the_day/vehicle_model.dart';
+import 'package:g_route/model/start_of_the_day/orders_model.dart';
+import 'package:g_route/model/start_of_the_day/route_model.dart';
+import 'package:g_route/model/start_of_the_day/sub_user_model.dart';
+import 'package:g_route/model/start_of_the_day/vehicle_model.dart';
 
 class DeliveryAssignmentModel {
   String? id;

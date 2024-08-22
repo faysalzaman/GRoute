@@ -157,11 +157,8 @@ class _ViewedAssignedRoutesScreenState
                                           Expanded(
                                             flex: 2,
                                             child: Text(
-                                              state
-                                                  .deliveryAssignments
-                                                  .orders![index]
-                                                  .customerProfile!
-                                                  .customerName
+                                              state.deliveryAssignments
+                                                  .orders![index].salesOrderID
                                                   .toString(),
                                             ),
                                           ),

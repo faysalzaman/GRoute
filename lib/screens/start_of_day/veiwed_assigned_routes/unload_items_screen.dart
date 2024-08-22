@@ -10,7 +10,7 @@ import 'package:g_route/cubit/image/image_cubit.dart';
 import 'package:g_route/cubit/image/image_state.dart';
 import 'package:g_route/cubit/sales_order_detail/sales_order_detail_cubit.dart';
 import 'package:g_route/cubit/sales_order_detail/sales_order_detail_state.dart';
-import 'package:g_route/model/deal_of_the_day/sales_order_detail_model.dart';
+import 'package:g_route/model/start_of_the_day/sales_order_detail_model.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/signature_screen.dart';
 import 'package:g_route/utils/app_loading.dart';
 import 'package:g_route/utils/app_navigator.dart';

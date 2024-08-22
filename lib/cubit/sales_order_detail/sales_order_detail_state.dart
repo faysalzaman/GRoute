@@ -1,4 +1,4 @@
-import 'package:g_route/model/deal_of_the_day/sales_order_detail_model.dart';
+import 'package:g_route/model/start_of_the_day/sales_order_detail_model.dart';
 
 abstract class SalesOrderDetailState {}
 

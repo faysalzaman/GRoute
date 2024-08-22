@@ -1,4 +1,4 @@
-import 'package:g_route/model/deal_of_the_day/delivery_assignment_model.dart';
+import 'package:g_route/model/start_of_the_day/delivery_assignment_model.dart';
 
 abstract class DeliveryAssignmentState {}
 
