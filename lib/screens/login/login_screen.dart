@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +13,7 @@ import 'package:g_route/utils/app_snackbar.dart';
 import 'package:g_route/widgets/bottom_line_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,6 +28,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _loginIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool isEnglish = true;
+  AuthCubit authCubit = AuthCubit();
 
   @override
   void dispose() {
@@ -37,9 +40,42 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  bool isEnglish = true;
+  Future<void> _requestPermissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.location,
+      Permission.storage,
+      Permission.camera,
+    ].request();
 
-  AuthCubit authCubit = AuthCubit();
+    if (statuses[Permission.location]!.isDenied) {
+      showAwesomeSnackbar(
+        context: context,
+        title: "Permission Denied",
+        message: "Location permission is required for this feature.",
+        contentType: ContentType.warning,
+      );
+    }
+  }
+
+  void _onLoginPressed() async {
+    // Request permissions before logging in
+    await _requestPermissions();
+
+    if (_loginIdController.text.isEmpty || _passwordController.text.isEmpty) {
+      showAwesomeSnackbar(
+        context: context,
+        title: "Warning!",
+        message: "Please enter Login ID and Password",
+        contentType: ContentType.warning,
+      );
+      return;
+    }
+
+    authCubit.login(
+      _loginIdController.text.trim(),
+      _passwordController.text.trim(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +92,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         automaticallyImplyLeading: false,
-        // menu icon will be show on right side
         actions: [
           IconButton(
             icon: const Icon(
@@ -107,7 +142,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       10.width,
                       Container(
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         width: MediaQuery.of(context).size.width * 0.7,
                         height: MediaQuery.of(context).size.height * 0.07,
                         child: TextField(
@@ -142,7 +178,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       10.width,
                       Container(
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         width: MediaQuery.of(context).size.width * 0.7,
                         height: MediaQuery.of(context).size.height * 0.07,
                         child: TextField(
@@ -237,23 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: TextButton(
-                          onPressed: () {
-                            if (_loginIdController.text.isEmpty ||
-                                _passwordController.text.isEmpty) {
-                              showAwesomeSnackbar(
-                                context: context,
-                                title: "Warning!",
-                                message: "Please enter Login ID and Password",
-                                contentType: ContentType.warning,
-                              );
-                              return;
-                            }
-
-                            authCubit.login(
-                              _loginIdController.text.trim(),
-                              _passwordController.text.trim(),
-                            );
-                          },
+                          onPressed: _onLoginPressed,
                           child: state is AuthLoading
                               ? Center(
                                   child: AppLoading.spinkitLoading(
@@ -294,11 +315,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             activeColor: AppColors.primaryColor,
                             value: isEnglish,
                             onChanged: (value) {
-                              setState(
-                                () {
-                                  isEnglish = value;
-                                },
-                              );
+                              setState(() {
+                                isEnglish = value;
+                              });
                             },
                           ),
                         ),
@@ -315,7 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           "assets/icons/qr_code.png",
                           width: 50,
                           height: 50,
-                        )
+                        ),
                       ],
                     ),
                   ],
