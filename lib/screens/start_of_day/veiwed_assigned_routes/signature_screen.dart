@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:g_route/constants/app_colors.dart';
-import 'package:g_route/cubit/delivery_assignment/delivery_assignment_cubit.dart';
 import 'package:g_route/cubit/image/image_cubit.dart';
 import 'package:g_route/cubit/image/image_state.dart';
+import 'package:g_route/model/start_of_the_day/customers_profile_model.dart';
 import 'package:g_route/utils/app_loading.dart';
 import 'package:g_route/utils/app_snackbar.dart';
 import 'package:g_route/widgets/bottom_line_widget.dart';
@@ -20,8 +20,13 @@ class SignatureScreen extends StatefulWidget {
   const SignatureScreen({
     super.key,
     required this.index,
+    required this.updateId,
+    required this.customersProfileModel,
   });
+
   final int index;
+  final String updateId;
+  final CustomersProfileModel customersProfileModel;
 
   @override
   _SignatureScreenState createState() => _SignatureScreenState();
@@ -111,6 +116,8 @@ class _SignatureScreenState extends State<SignatureScreen> {
               title: "Saved",
               message: "Signature saved successfully",
             );
+
+            Navigator.pop(context);
           }
         },
         builder: (context, state) {
@@ -137,11 +144,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
 
                   imageCubit.postImage(
                     [imageFile!],
-                    DeliveryAssignmentCubit.get(context)
-                        .deliveryAssignmentModel!
-                        .orders![widget.index]
-                        .id
-                        .toString(),
+                    widget.updateId,
                     "Signature",
                   );
                 },

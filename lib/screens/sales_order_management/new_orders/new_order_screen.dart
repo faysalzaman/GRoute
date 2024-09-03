@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:g_route/constants/app_colors.dart';
+import 'package:g_route/screens/sales_order_management/new_orders/list_of_items_screen.dart';
+import 'package:g_route/utils/app_navigator.dart';
 import 'package:g_route/widgets/bottom_line_widget.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -82,24 +84,32 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                         shrinkWrap: true,
                         separatorBuilder: (context, index) => 10.height,
                         itemBuilder: (context, index) {
-                          return Material(
-                            elevation: 5,
-                            child: Container(
-                              padding: const EdgeInsets.all(5),
-                              width: context.width() * 0.8,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(child: Text("${index + 1}")),
-                                  const Expanded(
-                                    flex: 3,
-                                    child: Text("SKR239w9er0wq99827382"),
-                                  ),
-                                ],
+                          return InkWell(
+                            onTap: () {
+                              AppNavigator.goToPage(
+                                context: context,
+                                screen: const ListOfItemsScreen(),
+                              );
+                            },
+                            child: Material(
+                              elevation: 5,
+                              child: Container(
+                                padding: const EdgeInsets.all(5),
+                                width: context.width() * 0.8,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(child: Text("  ${index + 1}")),
+                                    const Expanded(
+                                      flex: 3,
+                                      child: Text("SKR239w9er0wq99827382"),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -108,7 +118,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     ),
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
                         margin: const EdgeInsets.symmetric(vertical: 10),
@@ -123,11 +133,13 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'View Line Item',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
+                              const Expanded(
+                                child: Text(
+                                  'View Line Item',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                  ),
                                 ),
                               ),
                               Container(

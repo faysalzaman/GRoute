@@ -11,8 +11,8 @@ class OrderService {
     required String currentDate,
     required OrderAction action,
   }) async {
-    final url =
-        Uri.parse("${AppUrls.baseUrl}/api/v1/orders/updateOrder/$orderId");
+    final url = Uri.parse(
+        "${AppUrls.baseUrl}/api/v1/assignedOrder/updateAssignedOrder/$orderId");
 
     final headers = <String, String>{
       'Content-Type': 'application/json',

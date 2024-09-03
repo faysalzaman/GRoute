@@ -1,9 +1,12 @@
 // ignore_for_file: unused_field
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:g_route/controller/update_controller.dart';
+import 'package:g_route/cubit/customer_profile/customer_profile_cubit.dart';
+import 'package:g_route/cubit/customer_profile/customer_profile_state.dart';
+import 'package:g_route/model/start_of_the_day/goods_issue_model.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/unload_items_screen.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/journey_screen.dart';
-import 'package:g_route/cubit/delivery_assignment/delivery_assignment_cubit.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:g_route/widgets/info_row_widget.dart';
 import 'package:g_route/constants/app_colors.dart';
@@ -20,10 +23,16 @@ class AssignRouteScreen extends StatefulWidget {
     super.key,
     required this.buttonText,
     required this.index,
+    required this.updateId,
+    required this.gcpGlnId,
+    required this.goodsIssueModel,
   });
 
   final String buttonText;
   final int index;
+  final String updateId;
+  final String gcpGlnId;
+  final GoodsIssueModel goodsIssueModel;
 
   @override
   State<AssignRouteScreen> createState() => _AssignRouteScreenState();
@@ -42,6 +51,7 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
   void initState() {
     super.initState();
     _initializeLocation();
+    CustomersProfileCubit.get(context).getCustomersProfile(widget.gcpGlnId);
   }
 
   void _initializeLocation() async {
@@ -54,20 +64,14 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
       _currentLocation =
           LatLng(locationData.latitude!, locationData.longitude!);
       _destinationLocation = LatLng(
-        double.parse(DeliveryAssignmentCubit.get(context)
-            .deliveryAssignmentModel!
-            .orders![widget.index]
-            .customerProfile!
+        double.parse(CustomersProfileCubit.get(context)
+            .customersProfileModel!
             .latitude
             .toString()),
-        double.parse(
-          DeliveryAssignmentCubit.get(context)
-              .deliveryAssignmentModel!
-              .orders![widget.index]
-              .customerProfile!
-              .longitude
-              .toString(),
-        ),
+        double.parse(CustomersProfileCubit.get(context)
+            .customersProfileModel!
+            .longitude
+            .toString()),
       );
 
       // Calculate the distance
@@ -135,125 +139,159 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
           ? Center(
               child: AppLoading.spinkitLoading(AppColors.primaryColor, 50),
             ) // Show a loader while initializing
-          : Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: context.height() * 0.45,
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.primaryColor),
-                      ),
-                      child: GoogleMap(
-                        onMapCreated: (controller) {
-                          mapController = controller;
-                        },
-                        initialCameraPosition: CameraPosition(
-                          target: _currentLocation!,
-                          zoom: 14,
-                        ),
-                        markers: _markers,
-                        polylines: _polylines,
-                        myLocationEnabled: true,
-                        myLocationButtonEnabled: true,
-                        trafficEnabled: true,
+          : BlocConsumer<CustomersProfileCubit, CustomersProfileState>(
+              listener: (context, state) {},
+              builder: (context, state) {
+                if (state is CustomersProfileLoading) {
+                  Center(
+                    child:
+                        AppLoading.spinkitLoading(AppColors.primaryColor, 50),
+                  );
+                }
+                if (state is CustomersProfileError) {
+                  Center(
+                    child: Text(
+                      state.message,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Colors.red,
                       ),
                     ),
-                    10.height,
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.primaryColor),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          InfoRow(
-                            label: 'Picking Route ID:',
-                            value: DeliveryAssignmentCubit.get(context)
-                                .deliveryAssignmentModel!
-                                .orders![widget.index]
-                                .pickingRouteId
-                                .toString(),
+                  );
+                }
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: context.height() * 0.45,
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.primaryColor),
                           ),
-                          10.height,
-                          InfoRow(
-                              label: 'Inventory Location ID:',
-                              value: DeliveryAssignmentCubit.get(context)
-                                  .deliveryAssignmentModel!
-                                  .orders![widget.index]
-                                  .inventLocationId
-                                  .toString()),
-                          const SizedBox(height: 10),
-                          InfoRow(
-                            label: 'Date Assigned:',
-                            value: DateFormat('dd/MM/yyyy').format(
-                              DateTime.parse(
-                                  DeliveryAssignmentCubit.get(context)
-                                      .deliveryAssignmentModel!
-                                      .orders![widget.index]
-                                      .createdAt
+                          child: GoogleMap(
+                            onMapCreated: (controller) {
+                              mapController = controller;
+                            },
+                            initialCameraPosition: CameraPosition(
+                              target: _currentLocation!,
+                              zoom: 14,
+                            ),
+                            markers: _markers,
+                            polylines: _polylines,
+                            myLocationEnabled: true,
+                            myLocationButtonEnabled: true,
+                            trafficEnabled: true,
+                          ),
+                        ),
+                        10.height,
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.primaryColor),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              InfoRow(
+                                label: "Customer's ID:",
+                                value: CustomersProfileCubit.get(context)
+                                    .customersProfileModel!
+                                    .customerId
+                                    .toString(),
+                              ),
+                              10.height,
+                              InfoRow(
+                                  label: 'Member ID:',
+                                  value: CustomersProfileCubit.get(context)
+                                      .customersProfileModel!
+                                      .memberId
                                       .toString()),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          InfoRow(
-                            label: 'WMS Location:',
-                            value: DeliveryAssignmentCubit.get(context)
-                                .deliveryAssignmentModel!
-                                .orders![widget.index]
-                                .wmsLocationId
-                                .toString(),
-                          ),
-                          const SizedBox(height: 10),
-                          InfoRow(
-                            label: 'Distance:',
-                            value: '${_distanceInKm.toStringAsFixed(2)} km',
-                          ),
-                          const SizedBox(height: 10),
-                          const InfoRow(
-                            label: 'Duration:',
-                            value:
-                                '2 days  6 hours', // You should calculate this dynamically
-                          ),
-                        ],
-                      ),
-                    ),
-                    10.height,
-                    GestureDetector(
-                      onTap: () async {
-                        AppNavigator.replaceTo(
-                          context: context,
-                          screen: widget.buttonText == "Arrived"
-                              ? UnloadItemsScreen(index: widget.index)
-                              : JourneyScreen(index: widget.index),
-                        );
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        padding: const EdgeInsets.all(5),
-                        height: 50,
-                        width: double.infinity,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryColor,
-                        ),
-                        child: Center(
-                          child: Text(
-                            widget.buttonText,
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
+                              const SizedBox(height: 10),
+                              InfoRow(
+                                label: 'Date Assigned:',
+                                value: DateFormat('dd/MM/yyyy').format(
+                                  DateTime.parse(
+                                      CustomersProfileCubit.get(context)
+                                          .customersProfileModel!
+                                          .dateTimeCreated
+                                          .toString()),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              InfoRow(
+                                label: 'Wallet ID:',
+                                value: CustomersProfileCubit.get(context)
+                                    .customersProfileModel!
+                                    .walletIdNo
+                                    .toString(),
+                              ),
+                              const SizedBox(height: 10),
+                              InfoRow(
+                                label: 'Distance:',
+                                value: '${_distanceInKm.toStringAsFixed(2)} km',
+                              ),
+                              const SizedBox(height: 10),
+                              const InfoRow(
+                                label: 'Duration:',
+                                value:
+                                    '2 days  6 hours', // You should calculate this dynamically
+                              ),
+                            ],
                           ),
                         ),
-                      ),
+                        10.height,
+                        GestureDetector(
+                          onTap: () async {
+                            AppNavigator.replaceTo(
+                              context: context,
+                              screen: widget.buttonText == "Arrived"
+                                  ? UnloadItemsScreen(
+                                      index: widget.index,
+                                      updateId: widget.updateId,
+                                      customersProfileModel:
+                                          CustomersProfileCubit.get(context)
+                                              .customersProfileModel!,
+                                      goodsIssueModel: widget.goodsIssueModel,
+                                    )
+                                  : JourneyScreen(
+                                      index: widget.index,
+                                      updateId: widget.updateId,
+                                      customersProfileModel:
+                                          CustomersProfileCubit.get(context)
+                                              .customersProfileModel!,
+                                      gcpGlnId: widget.gcpGlnId,
+                                      goodsIssueModel: widget.goodsIssueModel,
+                                    ),
+                            );
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 20),
+                            padding: const EdgeInsets.all(5),
+                            height: 50,
+                            width: double.infinity,
+                            decoration: const BoxDecoration(
+                              color: AppColors.primaryColor,
+                            ),
+                            child: Center(
+                              child: Text(
+                                widget.buttonText,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
     );
   }

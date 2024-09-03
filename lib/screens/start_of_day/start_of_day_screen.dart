@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:g_route/constants/app_colors.dart';
-import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/viewed_assigned_routes_screen.dart';
+import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/sales_order_screen.dart';
 import 'package:g_route/utils/app_navigator.dart';
 import 'package:g_route/widgets/bottom_line_widget.dart';
 import 'package:g_route/widgets/grid_item_2_widget.dart';
@@ -34,7 +34,9 @@ class _StartOfDayScreenState extends State<StartOfDayScreen> {
         'assets/icons/viewed_assigned_routes.png',
         () {
           AppNavigator.goToPage(
-              context: context, screen: const ViewedAssignedRoutesScreen());
+            context: context,
+            screen: const SalesOrderScreen(),
+          );
         },
       ),
     ];

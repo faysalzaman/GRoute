@@ -52,6 +52,8 @@ dependencies:
   path_provider: ^2.1.4
   geocoding: ^3.0.0
   image: ^4.2.0
+  cached_network_image: ^3.4.0
+  pretty_qr_code: ^3.3.0
 
 dev_dependencies:
   flutter_test:

@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:g_route/controller/update_controller.dart';
-import 'package:g_route/cubit/delivery_assignment/delivery_assignment_cubit.dart';
+import 'package:g_route/model/start_of_the_day/customers_profile_model.dart';
+import 'package:g_route/model/start_of_the_day/goods_issue_model.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/assign_route_screen.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/full_screen_map.dart';
 import 'package:g_route/utils/app_loading.dart';
@@ -22,9 +23,17 @@ class JourneyScreen extends StatefulWidget {
   const JourneyScreen({
     super.key,
     required this.index,
+    required this.updateId,
+    required this.customersProfileModel,
+    required this.gcpGlnId,
+    required this.goodsIssueModel,
   });
 
   final int index;
+  final String updateId;
+  final CustomersProfileModel customersProfileModel;
+  final String gcpGlnId;
+  final GoodsIssueModel goodsIssueModel;
 
   @override
   State<JourneyScreen> createState() => _JourneyScreenState();
@@ -61,18 +70,8 @@ class _JourneyScreenState extends State<JourneyScreen> {
       _currentLocation =
           LatLng(locationData.latitude!, locationData.longitude!);
       _destinationLocation = LatLng(
-        double.parse(DeliveryAssignmentCubit.get(context)
-            .deliveryAssignmentModel!
-            .orders![widget.index]
-            .customerProfile!
-            .latitude
-            .toString()),
-        double.parse(DeliveryAssignmentCubit.get(context)
-            .deliveryAssignmentModel!
-            .orders![widget.index]
-            .customerProfile!
-            .longitude
-            .toString()),
+        double.parse(widget.customersProfileModel.latitude.toString()),
+        double.parse(widget.customersProfileModel.longitude.toString()),
       );
 
       // Calculate the distance
@@ -107,6 +106,9 @@ class _JourneyScreenState extends State<JourneyScreen> {
 
       _isLoading = false; // Set loading to false once everything is ready
     });
+
+    // Start the journey after initializing the location
+    _startJourney();
   }
 
   Future<String> _getAddressFromLatLng(LatLng position) async {
@@ -226,11 +228,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
   void _startJourney() async {
     try {
       await _orderService.updateOrderStatus(
-        orderId: DeliveryAssignmentCubit.get(context)
-            .deliveryAssignmentModel!
-            .orders![widget.index]
-            .id
-            .toString(),
+        orderId: widget.updateId,
         currentDate: DateTime.now().toIso8601String(),
         action: OrderAction.startJourney, // or any other action
       );
@@ -319,11 +317,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
   void _arrive() async {
     try {
       await _orderService.updateOrderStatus(
-        orderId: DeliveryAssignmentCubit.get(context)
-            .deliveryAssignmentModel!
-            .orders![widget.index]
-            .id
-            .toString(),
+        orderId: widget.updateId,
         currentDate: DateTime.now().toIso8601String(),
         action: OrderAction.arrivalTime, // or any other action
       );
@@ -334,6 +328,9 @@ class _JourneyScreenState extends State<JourneyScreen> {
           screen: AssignRouteScreen(
             buttonText: 'Arrived',
             index: widget.index,
+            updateId: widget.updateId,
+            gcpGlnId: widget.gcpGlnId,
+            goodsIssueModel: widget.goodsIssueModel,
           ),
         );
       }
@@ -346,6 +343,9 @@ class _JourneyScreenState extends State<JourneyScreen> {
           screen: AssignRouteScreen(
             buttonText: 'Arrived',
             index: widget.index,
+            updateId: widget.updateId,
+            gcpGlnId: widget.gcpGlnId,
+            goodsIssueModel: widget.goodsIssueModel,
           ),
         );
       }

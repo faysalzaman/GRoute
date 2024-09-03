@@ -17,8 +17,8 @@ class ImageController {
     String imageType, {
     int maxSizeInBytes = 5000000, // 5 MB
   }) async {
-    var url =
-        Uri.parse("${AppUrls.baseUrl}/api/v1/orders/addOrderImage/$orderId");
+    var url = Uri.parse(
+        "${AppUrls.baseUrl}/api/v1/assignedOrder/addAssignedOrderImage/$orderId");
 
     _logger.i("Uploading images to: $url");
 

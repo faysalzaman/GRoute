@@ -7,12 +7,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:g_route/constants/app_colors.dart';
 import 'package:g_route/controller/image_controller/image_controller.dart';
 import 'package:g_route/controller/update_controller.dart';
-import 'package:g_route/cubit/delivery_assignment/delivery_assignment_cubit.dart';
 import 'package:g_route/cubit/image/image_cubit.dart';
 import 'package:g_route/cubit/image/image_state.dart';
-import 'package:g_route/cubit/sales_order_detail/sales_order_detail_cubit.dart';
-import 'package:g_route/cubit/sales_order_detail/sales_order_detail_state.dart';
-import 'package:g_route/model/start_of_the_day/sales_order_detail_model.dart';
+import 'package:g_route/cubit/sales_order/sales_order_cubit.dart';
+import 'package:g_route/model/start_of_the_day/customers_profile_model.dart';
+import 'package:g_route/model/start_of_the_day/goods_issue_model.dart';
+import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/sales_order_details_screen.dart';
+import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/sales_order_screen.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/signature_screen.dart';
 import 'package:g_route/utils/app_loading.dart';
 import 'package:g_route/utils/app_navigator.dart';
@@ -25,9 +26,15 @@ class UnloadItemsScreen extends StatefulWidget {
   const UnloadItemsScreen({
     super.key,
     required this.index,
+    required this.updateId,
+    required this.customersProfileModel,
+    required this.goodsIssueModel,
   });
 
   final int index;
+  final String updateId;
+  final CustomersProfileModel customersProfileModel;
+  final GoodsIssueModel goodsIssueModel;
 
   @override
   State<UnloadItemsScreen> createState() => _UnloadItemsScreenState();
@@ -42,9 +49,6 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
 
   late TabController _tabController;
 
-  SalesOrderDetailCubit salesOrderDetailCubit = SalesOrderDetailCubit();
-  List<SalesOrderDetailModel> table = [];
-
   ImageCubit imageCubit = ImageCubit();
 
   @override
@@ -52,12 +56,15 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
     super.initState();
 
     _tabController = TabController(length: 2, vsync: this);
-    salesOrderDetailCubit.getSalesOrderDetail(
-        DeliveryAssignmentCubit.get(context)
-            .deliveryAssignmentModel!
-            .orders![widget.index]
-            .tblSalesOrderId
-            .toString());
+
+    // TODO: this has to be done
+
+    // salesOrderDetailCubit.getSalesOrderDetail(
+    //     DeliveryAssignmentCubit.get(context)
+    //         .deliveryAssignmentModel!
+    //         .orders![widget.index]
+    //         .tblSalesOrderId
+    //         .toString());
   }
 
   Future<void> pickImage() async {
@@ -147,87 +154,29 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          BlocConsumer<SalesOrderDetailCubit, SalesOrderDetailState>(
-            bloc: salesOrderDetailCubit,
-            listener: (context, state) {
-              if (state is SalesOrderDetailLoaded) {
-                table = state.salesOrderDetail;
-              }
-            },
-            builder: (context, state) {
-              if (state is SalesOrderDetailLoading) {
-                return Center(
-                  child: AppLoading.spinkitLoading(AppColors.primaryColor, 50),
+          SizedBox(
+            child: BlocConsumer<SalesOrderCubit, SalesOrderState>(
+              listener: (context, state) {},
+              builder: (context, state) {
+                if (state is SalesOrderGoodsIssueLoading) {
+                  return _buildLineItemsTable([]);
+                }
+                return _buildLineItemsTable(
+                  SalesOrderCubit.get(context).goodsIssueDetails,
                 );
-              }
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.red), // Red border
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                  child: SizedBox(
-                    width: MediaQuery.of(context)
-                        .size
-                        .width, // Ensure the table fits within the screen
-
-                    child: Theme(
-                      data: Theme.of(context).copyWith(
-                        cardColor: Colors
-                            .white, // Set the background color of the table to white
-                        dataTableTheme: DataTableThemeData(
-                          headingRowColor: MaterialStateColor.resolveWith(
-                            (states) => Colors.pink,
-                          ),
-                          headingTextStyle: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          dataRowColor: MaterialStateColor.resolveWith(
-                            (states) => Colors
-                                .white, // Set row background color to white
-                          ),
-                        ),
-                      ),
-                      child: PaginatedDataTable(
-                        // header: const Text('Sales Order Details'),
-                        rowsPerPage: 4, // Show 5 items per page
-                        columns: const [
-                          // DataColumn(label: Text('ID')),
-                          DataColumn(label: Text('RP Doc No')),
-                          DataColumn(label: Text('Date Time Created')),
-                          DataColumn(label: Text('SO Ref Code No')),
-                          DataColumn(label: Text('SO Item Code')),
-                          DataColumn(label: Text('SO Item Description')),
-                          DataColumn(label: Text('SO Order Qty')),
-                          DataColumn(label: Text('SO Item Unit')),
-                          DataColumn(label: Text('SO Item Price')),
-                          DataColumn(label: Text('SO Customer No')),
-                          DataColumn(label: Text('SO Already Selected')),
-                          DataColumn(label: Text('SO Item Free Qty')),
-                          DataColumn(label: Text('SO Total Amount Price')),
-                          DataColumn(label: Text('SO Total Amount Net Price')),
-                          DataColumn(label: Text('SO Total Vat Amount')),
-                          DataColumn(label: Text('SO Total Discount Amount')),
-                          DataColumn(label: Text('SO Remarks')),
-                          DataColumn(label: Text('Order')),
-                        ],
-                        source: _DataSource(table, context),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
+              },
+            ),
           ),
           const SizedBox(height: 16),
           GestureDetector(
             onTap: () {
               AppNavigator.goToPage(
                 context: context,
-                screen: SignatureScreen(index: widget.index),
+                screen: SignatureScreen(
+                  index: widget.index,
+                  updateId: widget.updateId,
+                  customersProfileModel: widget.customersProfileModel,
+                ),
               );
             },
             child: Container(
@@ -251,36 +200,24 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
             onTap: () async {
               try {
                 await _orderService.updateOrderStatus(
-                  orderId: DeliveryAssignmentCubit.get(context)
-                      .deliveryAssignmentModel!
-                      .orders![widget.index]
-                      .id
-                      .toString(),
+                  orderId: widget.updateId,
                   currentDate: DateTime.now().toIso8601String(),
                   action: OrderAction.invoiceCreationTime,
                 );
 
                 await _orderService.updateOrderStatus(
-                  orderId: DeliveryAssignmentCubit.get(context)
-                      .deliveryAssignmentModel!
-                      .orders![widget.index]
-                      .id
-                      .toString(),
+                  orderId: widget.updateId,
                   currentDate: DateTime.now().toIso8601String(),
                   action: OrderAction.unloadingTime,
                 );
 
                 await _orderService.updateOrderStatus(
-                  orderId: DeliveryAssignmentCubit.get(context)
-                      .deliveryAssignmentModel!
-                      .orders![widget.index]
-                      .id
-                      .toString(),
+                  orderId: widget.updateId,
                   currentDate: DateTime.now().toIso8601String(),
                   action: OrderAction.completed,
                 );
 
-                DeliveryAssignmentCubit.get(context).getDeliveryAssignments();
+                SalesOrderCubit.get(context).getAssignedOrders();
 
                 showAwesomeSnackbar(
                   context: context,
@@ -467,11 +404,7 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
                     // Call the method with the resized files
                     imageCubit.postImage(
                       files,
-                      DeliveryAssignmentCubit.get(context)
-                          .deliveryAssignmentModel!
-                          .orders![widget.index]
-                          .id
-                          .toString(),
+                      widget.updateId,
                       "Image",
                     );
                   } else {
@@ -502,48 +435,139 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
       ),
     );
   }
-}
 
-class _DataSource extends DataTableSource {
-  final List<SalesOrderDetailModel> _data;
-  final BuildContext context;
-
-  _DataSource(this._data, this.context);
-
-  @override
-  DataRow? getRow(int index) {
-    final SalesOrderDetailModel e = _data[index];
-    return DataRow.byIndex(
-      index: index,
-      cells: [
-        // DataCell(Text(e.id.toString())),
-        DataCell(Text(e.rPDocNo.toString())),
-        DataCell(Text(e.dateTimeCreated.toString())),
-        DataCell(Text(e.sORefCodeNo.toString())),
-        DataCell(Text(e.sOItemCode.toString())),
-        DataCell(Text(e.sOItemDescription.toString())),
-        DataCell(Text(e.sOOrderQty.toString())),
-        DataCell(Text(e.sOItemUnit.toString())),
-        DataCell(Text(e.sOItemPrice.toString())),
-        DataCell(Text(e.sOCustomerNo.toString())),
-        DataCell(Text(e.sOAlreadySelected.toString())),
-        DataCell(Text(e.sOItemFreeQty.toString())),
-        DataCell(Text(e.sOTotalAmountPrice.toString())),
-        DataCell(Text(e.sOTotalAmountNetPrice.toString())),
-        DataCell(Text(e.sOTotalVatAmount.toString())),
-        DataCell(Text(e.sOTotalDiscountAmount.toString())),
-        DataCell(Text(e.sORemarks.toString())),
-        DataCell(Text(e.order.toString())),
-      ],
+  Widget _buildLineItemsTable(List<GoodsIssueModel> data) {
+    LineItemSource dataSource = LineItemSource(
+      data,
+      (GoodsIssueModel item) {},
+      (GoodsIssueModel item) {
+        AppNavigator.goToPage(
+            context: context, screen: const SalesOrderDetailsScreen());
+      },
+    );
+    return Container(
+      color: Colors.white,
+      child: DataTableTheme(
+        data: DataTableThemeData(
+          headingRowColor: MaterialStateColor.resolveWith(
+            (states) => Colors.pink,
+          ), // Set the header color to blue
+          dataRowColor: MaterialStateColor.resolveWith(
+            (states) => Colors.white,
+          ), // Set the table cells color to white
+        ),
+        child: PaginatedDataTable(
+          columns: const [
+            DataColumn(
+              label: Text(
+                'Shipping Trx Code',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'GTIN',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Item SKU',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Batch No',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Serial No',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Manufacturing Date',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Expiry Date',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Packaging Date',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Sell By',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Receiving UOM',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Box Barcode',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'SSCC Barcode',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Quantity',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'EUDAMED Code',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'UDI Code',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'GPC Code',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                'Tbl Goods Issue Master Id',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+          source: dataSource,
+          columnSpacing: 20,
+          horizontalMargin: 10,
+          rowsPerPage: 3,
+          showCheckboxColumn: true,
+        ),
+      ),
     );
   }
-
-  @override
-  int get rowCount => _data.length;
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get selectedRowCount => 0;
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:g_route/cubit/delivery_assignment/delivery_assignment_cubit.dart';
+import 'package:g_route/constants/app_colors.dart';
+import 'package:g_route/cubit/customer_profile/customer_profile_cubit.dart';
+import 'package:g_route/cubit/sales_order/sales_order_cubit.dart';
 import 'package:g_route/splash_screen.dart';
 
 void main() async {
@@ -17,13 +19,26 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => DeliveryAssignmentCubit(),
-        ),
+        // BlocProvider(
+        //   create: (context) => DeliveryAssignmentCubit(),
+        // ),
+        BlocProvider(create: (context) => SalesOrderCubit()),
+        BlocProvider(create: (context) => CustomersProfileCubit())
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: SplashScreen(),
+        theme: ThemeData(
+          primarySwatch: Colors.blue, // Your primary color
+          checkboxTheme: CheckboxThemeData(
+            fillColor: MaterialStateProperty.resolveWith((states) {
+              if (states.contains(MaterialState.selected)) {
+                return AppColors.primaryColor; // Change to your primary color
+              }
+              return Colors.white; // Default color when not selected
+            }),
+          ),
+        ),
+        home: const SplashScreen(),
       ),
     );
   }
