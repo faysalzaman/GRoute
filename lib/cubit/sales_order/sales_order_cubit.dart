@@ -41,15 +41,14 @@ class SalesOrderCubit extends Cubit<SalesOrderState> {
     }
   }
 
-  void getGtinProduct(String barcode) async {
+  void getGtinProduct(String gtin) async {
     emit(SalesOrderGtinProductLoadingState());
     try {
       var isConnected = await ConnectivityService.isConnected();
       if (!isConnected) {
         emit(SalesOrderGtinProductErrorState("No Internet Connection"));
       }
-      gtinProductModel =
-          await SalesOrderController.getGtinProductModel(barcode);
+      gtinProductModel = await SalesOrderController.getGtinProductModel(gtin);
 
       emit(SalesOrderGtinProductSuccessState(gtinProductModel!));
     } catch (e) {

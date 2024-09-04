@@ -178,9 +178,8 @@ class _SignatureScreenState extends State<SignatureScreen> {
                     padding: const EdgeInsets.all(5),
                     height: 40,
                     width: 100,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primaryColor,
-                    ),
+                    decoration:
+                        const BoxDecoration(color: AppColors.primaryColor),
                     child: const Center(
                       child: Text(
                         "Back",

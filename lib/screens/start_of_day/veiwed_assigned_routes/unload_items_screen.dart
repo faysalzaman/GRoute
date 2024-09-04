@@ -221,7 +221,7 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
 
                 showAwesomeSnackbar(
                   context: context,
-                  title: "Delivered",
+                  title: "delivered",
                   message: "Items delivered successfully",
                 );
                 Navigator.of(context).pop();
@@ -231,7 +231,7 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
 
                 showAwesomeSnackbar(
                   context: context,
-                  title: "Delivered",
+                  title: "delivered",
                   message: "Items delivered successfully",
                 );
                 Navigator.of(context).pop();
@@ -442,8 +442,11 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
       (GoodsIssueModel item) {},
       (GoodsIssueModel item) {
         AppNavigator.goToPage(
-            context: context, screen: const SalesOrderDetailsScreen());
+            context: context,
+            screen: SalesOrderDetailsScreen(
+                gtin: widget.goodsIssueModel.gTIN.toString()));
       },
+      context,
     );
     return Container(
       color: Colors.white,

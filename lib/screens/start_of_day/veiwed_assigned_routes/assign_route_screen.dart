@@ -1,7 +1,6 @@
 // ignore_for_file: unused_field
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:g_route/controller/update_controller.dart';
 import 'package:g_route/cubit/customer_profile/customer_profile_cubit.dart';
 import 'package:g_route/cubit/customer_profile/customer_profile_state.dart';
 import 'package:g_route/model/start_of_the_day/goods_issue_model.dart';
@@ -110,8 +109,6 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
     super.dispose();
   }
 
-  final OrderService _orderService = OrderService();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -198,48 +195,54 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               InfoRow(
-                                label: "Customer's ID:",
+                                label: "Customer's Name:",
                                 value: CustomersProfileCubit.get(context)
-                                    .customersProfileModel!
-                                    .customerId
-                                    .toString(),
+                                        .customersProfileModel!
+                                        .customerName ??
+                                    "",
                               ),
                               10.height,
                               InfoRow(
-                                  label: 'Member ID:',
+                                  label: 'Contact Person:',
                                   value: CustomersProfileCubit.get(context)
-                                      .customersProfileModel!
-                                      .memberId
-                                      .toString()),
+                                          .customersProfileModel!
+                                          .contactPerson ??
+                                      ""),
                               const SizedBox(height: 10),
                               InfoRow(
                                 label: 'Date Assigned:',
                                 value: DateFormat('dd/MM/yyyy').format(
                                   DateTime.parse(
-                                      CustomersProfileCubit.get(context)
-                                          .customersProfileModel!
-                                          .dateTimeCreated
-                                          .toString()),
+                                    CustomersProfileCubit.get(context)
+                                            .customersProfileModel!
+                                            .dateTimeCreated ??
+                                        "",
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 10),
                               InfoRow(
-                                label: 'Wallet ID:',
+                                label: 'Mobile Number:',
                                 value: CustomersProfileCubit.get(context)
-                                    .customersProfileModel!
-                                    .walletIdNo
-                                    .toString(),
+                                        .customersProfileModel!
+                                        .mobileNumber ??
+                                    "",
                               ),
                               const SizedBox(height: 10),
                               InfoRow(
-                                label: 'Distance:',
-                                value: '${_distanceInKm.toStringAsFixed(2)} km',
+                                label: 'Company Name:',
+                                value: CustomersProfileCubit.get(context)
+                                        .customersProfileModel!
+                                        .companyName ??
+                                    "",
                               ),
                               const SizedBox(height: 10),
-                              const InfoRow(
-                                label: 'Duration:',
-                                value:
-                                    '2 days  6 hours', // You should calculate this dynamically
+                              InfoRow(
+                                label: 'Adress:',
+                                value: CustomersProfileCubit.get(context)
+                                        .customersProfileModel!
+                                        .address ??
+                                    "",
                               ),
                             ],
                           ),

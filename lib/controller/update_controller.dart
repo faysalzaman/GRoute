@@ -37,7 +37,7 @@ class OrderService {
         body = {"invoiceCreationTime": currentDate};
         break;
       case OrderAction.completed:
-        body = {"status": "completed"};
+        body = {"status": "completed", "endJourneyTime": currentDate};
         break;
       default:
         body = {"loadingTime": currentDate};

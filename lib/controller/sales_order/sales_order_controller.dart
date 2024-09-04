@@ -56,7 +56,7 @@ class SalesOrderController {
   static Future<CustomersProfileModel> getCustomerProfile(
       String gcpGlnId) async {
     final url = Uri.parse(
-        "${AppUrls.baseUrl}/api/v1/customers/getCustomerProfiles?gcpGLNID=234553333542");
+        "${AppUrls.baseUrl}/api/v1/customers/getCustomerProfiles?gcpGLNID=$gcpGlnId");
 
     final headers = <String, String>{'Content-Type': 'application/json'};
 
@@ -71,9 +71,8 @@ class SalesOrderController {
     }
   }
 
-  static Future<GtinProductModel> getGtinProductModel(String barcode) async {
-    final url =
-        Uri.parse("${AppUrls.gs1Url}/api/products?barcode=6287003071105");
+  static Future<GtinProductModel> getGtinProductModel(String gtin) async {
+    final url = Uri.parse("${AppUrls.gs1Url}/api/products?barcode=$gtin");
 
     final headers = <String, String>{
       'Content-Type': 'application/json',
@@ -82,6 +81,8 @@ class SalesOrderController {
     };
 
     final response = await http.get(url, headers: headers);
+
+    print(url);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       var data = jsonDecode(response.body) as List;

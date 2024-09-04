@@ -55,9 +55,8 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // TODO: Filter the data of the assigned orders
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 width: double.infinity,
                 height: 40,
                 child: Row(
@@ -70,6 +69,7 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: TextField(
+                          onChanged: (value) {},
                           controller: searchController,
                           decoration: const InputDecoration(
                             hintText: 'Search',
@@ -98,7 +98,7 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                               SalesOrderCubit.get(context)
                                   .assignedOrders
                                   .where((element) => element
-                                      .tblGoodsIssueMaster!.id!
+                                      .tblGoodsIssueMaster!.salesOrderNo!
                                       .toString()
                                       .contains(searchController.text))
                                   .toList();
@@ -110,7 +110,6 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-
               BlocBuilder<SalesOrderCubit, SalesOrderState>(
                 builder: (context, state) {
                   return SizedBox(
@@ -197,17 +196,18 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                               ),
                             ),
                             Container(
-                                width: 100,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 10),
-                                decoration: BoxDecoration(border: Border.all()),
-                                child: Text(
-                                  "${SalesOrderCubit.get(context).goodsIssueDetails.length}",
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                )),
+                              width: 100,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 10),
+                              decoration: BoxDecoration(border: Border.all()),
+                              child: Text(
+                                "${SalesOrderCubit.get(context).goodsIssueDetails.length}",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ],
@@ -253,6 +253,12 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
         ),
         child: PaginatedDataTable(
           columns: const [
+            DataColumn(
+              label: Text(
+                'Sales Order No',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
             DataColumn(
               label: Text(
                 'ID',
@@ -327,12 +333,6 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
             ),
             DataColumn(
               label: Text(
-                'Sales Order No',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
                 'Sales Invoice No',
                 style: TextStyle(color: Colors.white),
               ),
@@ -386,32 +386,32 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
   }
 
   Widget _buildLineItemsTable(List<GoodsIssueModel> data) {
-    LineItemSource dataSource = LineItemSource(
-      data,
-      (GoodsIssueModel item) {
-        AppNavigator.goToPage(
-          context: context,
-          screen: AssignRouteScreen(
-            index: data.indexOf(item),
-            buttonText: 'Start Journey',
-            updateId: SalesOrderCubit.get(context)
-                .assignedOrders[selectedRowIndex!]
-                .id
-                .toString(),
-            gcpGlnId: SalesOrderCubit.get(context)
-                .assignedOrders[selectedRowIndex!]
-                .tblGoodsIssueMaster!
-                .gcpGLNID
-                .toString(),
-            goodsIssueModel: item,
-          ),
-        );
-      },
-      (GoodsIssueModel item) {
-        AppNavigator.goToPage(
-            context: context, screen: const SalesOrderDetailsScreen());
-      },
-    );
+    LineItemSource dataSource = LineItemSource(data, (GoodsIssueModel item) {
+      AppNavigator.goToPage(
+        context: context,
+        screen: AssignRouteScreen(
+          index: data.indexOf(item),
+          buttonText: 'Start Journey',
+          updateId: SalesOrderCubit.get(context)
+              .assignedOrders[selectedRowIndex!]
+              .id
+              .toString(),
+          gcpGlnId: SalesOrderCubit.get(context)
+              .assignedOrders[selectedRowIndex!]
+              .tblGoodsIssueMaster!
+              .gcpGLNID
+              .toString(),
+          goodsIssueModel: item,
+        ),
+      );
+    }, (GoodsIssueModel item) {
+      AppNavigator.goToPage(
+        context: context,
+        screen: SalesOrderDetailsScreen(
+          gtin: item.gTIN.toString(),
+        ),
+      );
+    }, context);
     return Container(
       color: Colors.white,
       child: DataTableTheme(
@@ -549,15 +549,27 @@ class _DataSource extends DataTableSource {
   @override
   DataRow getRow(int index) {
     final AssignedOrdersModel data = _data[index];
+
+    // Check if disposition is "Delivered"
+    bool isDelivered = data.tblGoodsIssueMaster?.disposition == "delivered" ||
+        data.tblGoodsIssueMaster?.disposition == "Delivered";
+
     return DataRow.byIndex(
       index: index,
-      selected: _selectedRowIndex == index,
+      selected:
+          _selectedRowIndex == index && !isDelivered, // Deselect if delivered
       onSelectChanged: (selected) {
-        if (selected != null) {
+        if (selected != null && !isDelivered) {
+          // Call the callback to manage selection
           _onSelectRow(index, selected);
+        } else if (isDelivered) {
+          // Show a message that this order has been delivered
+          // Use Flutter's standard method to show a snackbar
+          toast("This order has been delivered.");
         }
       },
       cells: <DataCell>[
+        DataCell(Text(data.tblGoodsIssueMaster!.salesOrderNo ?? '')),
         DataCell(Text(data.tblGoodsIssueMaster!.id ?? '')),
         DataCell(Text(data.tblGoodsIssueMaster!.shippingTrxCode ?? '')),
         DataCell(Text(data.tblGoodsIssueMaster!.shipToLocation ?? '')),
@@ -566,11 +578,19 @@ class _DataSource extends DataTableSource {
         DataCell(Text(data.tblGoodsIssueMaster!.shipDate ?? '')),
         DataCell(Text(data.tblGoodsIssueMaster!.activityType ?? '')),
         DataCell(Text(data.tblGoodsIssueMaster!.bisStep ?? '')),
-        DataCell(Text(data.tblGoodsIssueMaster!.disposition ?? '')),
+        DataCell(Text(
+          data.tblGoodsIssueMaster!.disposition ?? '',
+          style: TextStyle(
+            color: data.tblGoodsIssueMaster!.disposition == "delivered" ||
+                    data.tblGoodsIssueMaster!.disposition == "Delivered"
+                ? Colors.green
+                : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        )),
         DataCell(Text(data.tblGoodsIssueMaster!.bisTransactionType ?? '')),
         DataCell(Text(data.tblGoodsIssueMaster!.bisTransactionID ?? '')),
         DataCell(Text(data.tblGoodsIssueMaster!.purchaseOrderNo ?? '')),
-        DataCell(Text(data.tblGoodsIssueMaster!.salesOrderNo ?? '')),
         DataCell(Text(data.tblGoodsIssueMaster!.salesInvoiceNo ?? '')),
         DataCell(Text(data.tblGoodsIssueMaster!.transactionDateTime ?? '')),
         DataCell(Text(data.tblGoodsIssueMaster!.gcpGLNID ?? '')),
@@ -593,133 +613,257 @@ class _DataSource extends DataTableSource {
 class LineItemSource extends DataTableSource {
   final List<GoodsIssueModel> _data;
   final void Function(GoodsIssueModel) onDoubleTap;
-  final void Function(GoodsIssueModel)
-      onSingleTap; // Add a callback for single tap
+  final void Function(GoodsIssueModel) onSingleTap;
+  int? _selectedRowIndex;
+  final BuildContext context;
 
-  LineItemSource(this._data, this.onDoubleTap, this.onSingleTap);
+  LineItemSource(
+    this._data,
+    this.onDoubleTap,
+    this.onSingleTap,
+    this.context,
+  );
 
   @override
   DataRow getRow(int index) {
     final GoodsIssueModel data = _data[index];
+
     return DataRow.byIndex(
       index: index,
+      selected: _selectedRowIndex == index, // Highlight the selected row
+      onSelectChanged: (selected) {
+        // Handle single tap selection
+        if (selected != null) {
+          if (_selectedRowIndex == index) {
+            // If the same row is double-tapped, deselect it
+            _selectedRowIndex = null;
+            SalesOrderCubit.get(context).goodsIssueDetails.clear();
+          } else {
+            // Select the new row
+            _selectedRowIndex = index;
+          }
+          notifyListeners();
+        }
+      },
       cells: <DataCell>[
         DataCell(
           GestureDetector(
-            onTap: () => onSingleTap(data), // Handle single tap
-            onDoubleTap: () => onDoubleTap(data), // Handle double tap
+            onTap: () => onSingleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.shippingTrxCode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.gTIN ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.itemSKU ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.batchNo ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.serialNo ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.manufacturingDate ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.expiryDate ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.packagingDate ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.sellBy ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.receivingUOM ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.boxBarcode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.sSCCBarcode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.qty ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.eUDAMEDCode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.uDICode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.gPCCode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            onDoubleTap: () => onDoubleTap(data),
+            onDoubleTap: () {
+              if (_selectedRowIndex == index) {
+                // On double tap, deselect the row
+                _selectedRowIndex = null;
+              }
+              notifyListeners();
+            },
             child: Text(data.tblGoodsIssueMasterId ?? ''),
           ),
         ),
@@ -734,5 +878,5 @@ class LineItemSource extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get selectedRowCount => 0;
+  int get selectedRowCount => _selectedRowIndex == null ? 0 : 1;
 }

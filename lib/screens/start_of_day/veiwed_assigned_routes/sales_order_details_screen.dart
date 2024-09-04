@@ -9,7 +9,9 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 
 class SalesOrderDetailsScreen extends StatefulWidget {
-  const SalesOrderDetailsScreen({super.key});
+  const SalesOrderDetailsScreen({super.key, required this.gtin});
+
+  final String gtin;
 
   @override
   State<SalesOrderDetailsScreen> createState() =>
@@ -20,7 +22,7 @@ class _SalesOrderDetailsScreenState extends State<SalesOrderDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    SalesOrderCubit.get(context).getGtinProduct("234324");
+    SalesOrderCubit.get(context).getGtinProduct(widget.gtin);
   }
 
   @override
@@ -138,7 +140,9 @@ class _SalesOrderDetailsScreenState extends State<SalesOrderDetailsScreen> {
                             width: 80,
                             height: 80,
                             child: PrettyQrView.data(
-                              data: "null",
+                              data: SalesOrderCubit.get(context)
+                                  .gtinProductModel!
+                                  .barcode!,
                             ),
                           ),
                         ],
@@ -159,14 +163,28 @@ class _SalesOrderDetailsScreenState extends State<SalesOrderDetailsScreen> {
                   child: Column(
                     children: [
                       KeyValueInfoWidget(
-                        keyy: 'Brand Name',
+                        keyy: 'Product Name (Eng)',
+                        value: SalesOrderCubit.get(context)
+                                .gtinProductModel!
+                                .productnameenglish ??
+                            "",
+                      ),
+                      KeyValueInfoWidget(
+                        keyy: 'Prduct Name (Ar)',
+                        value: SalesOrderCubit.get(context)
+                                .gtinProductModel!
+                                .productnamearabic ??
+                            "",
+                      ),
+                      KeyValueInfoWidget(
+                        keyy: 'Brand Name (Eng)',
                         value: SalesOrderCubit.get(context)
                                 .gtinProductModel!
                                 .brandName ??
                             "",
                       ),
                       KeyValueInfoWidget(
-                        keyy: 'Brand Name Arabic',
+                        keyy: 'Brand Name (Ar)',
                         value: SalesOrderCubit.get(context)
                                 .gtinProductModel!
                                 .brandNameAr ??
@@ -187,24 +205,31 @@ class _SalesOrderDetailsScreenState extends State<SalesOrderDetailsScreen> {
                             "",
                       ),
                       KeyValueInfoWidget(
-                        keyy: 'GCP GLN Id',
+                        keyy: 'HS Codes',
                         value: SalesOrderCubit.get(context)
                                 .gtinProductModel!
-                                .gcpGLNID ??
+                                .hSCODES ??
                             "",
                       ),
                       KeyValueInfoWidget(
-                        keyy: 'Child Product',
+                        keyy: 'Packaging Type',
                         value: SalesOrderCubit.get(context)
                                 .gtinProductModel!
-                                .childProduct ??
+                                .packagingType ??
+                            "",
+                      ),
+                      KeyValueInfoWidget(
+                        keyy: 'Origin',
+                        value: SalesOrderCubit.get(context)
+                                .gtinProductModel!
+                                .origin ??
                             "",
                       ),
                       KeyValueInfoWidget(
                         keyy: 'Product Type',
                         value: SalesOrderCubit.get(context)
                                 .gtinProductModel!
-                                .ProductType ??
+                                .productType ??
                             "",
                       ),
                     ],
