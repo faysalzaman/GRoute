@@ -1,3 +1,4 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:g_route/constants/app_colors.dart';
@@ -7,6 +8,7 @@ import 'package:g_route/model/start_of_the_day/goods_issue_model.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/assign_route_screen.dart';
 import 'package:g_route/screens/start_of_day/veiwed_assigned_routes/sales_order_details_screen.dart';
 import 'package:g_route/utils/app_navigator.dart';
+import 'package:g_route/utils/app_snackbar.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class SalesOrderScreen extends StatefulWidget {
@@ -239,6 +241,7 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
           },
         );
       },
+      context,
     );
     return Container(
       color: Colors.white,
@@ -543,8 +546,10 @@ class _DataSource extends DataTableSource {
   final List<AssignedOrdersModel> _data;
   final int? _selectedRowIndex; // Single selected row index
   final Function(int index, bool selected) _onSelectRow;
+  final BuildContext context;
 
-  _DataSource(this._data, this._selectedRowIndex, this._onSelectRow);
+  _DataSource(
+      this._data, this._selectedRowIndex, this._onSelectRow, this.context);
 
   @override
   DataRow getRow(int index) {
@@ -565,7 +570,12 @@ class _DataSource extends DataTableSource {
         } else if (isDelivered) {
           // Show a message that this order has been delivered
           // Use Flutter's standard method to show a snackbar
-          toast("This order has been delivered.");
+          showAwesomeSnackbar(
+            context: context,
+            title: "Delivered",
+            message: "This order has been delivered.",
+            contentType: ContentType.warning,
+          );
         }
       },
       cells: <DataCell>[
