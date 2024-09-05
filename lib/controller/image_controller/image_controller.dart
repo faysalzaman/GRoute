@@ -62,7 +62,7 @@ class ImageController {
     }
   }
 
-  /// Resizes the image if it exceeds the specified maximum size in bytes.
+  /// Resizes the image to a smaller size and compresses it if it exceeds the specified maximum size in bytes.
   static Future<File> resizeImageIfNeeded(File image,
       {int maxSizeInBytes = 5000000}) async {
     // Check if the image file size is larger than the specified max size
@@ -75,8 +75,9 @@ class ImageController {
         throw Exception("Unable to decode image");
       }
 
-      // Calculate the scale factor to reduce the image size
-      double scaleFactor = (maxSizeInBytes / imageBytes.length).clamp(0.0, 1.0);
+      // More aggressive resizing strategy: reduce image size by 50% or more
+      double scaleFactor = (maxSizeInBytes / imageBytes.length)
+          .clamp(0.0, 0.5); // Cut size to 50% or smaller
 
       // Calculate the new dimensions while maintaining the aspect ratio
       int newWidth = (originalImage.width * scaleFactor).round();
@@ -86,8 +87,9 @@ class ImageController {
       img.Image resizedImage =
           img.copyResize(originalImage, width: newWidth, height: newHeight);
 
-      // Encode the image back to a file format
-      List<int> resizedImageBytes = img.encodeJpg(resizedImage, quality: 85);
+      // Apply higher compression (lower quality)
+      List<int> resizedImageBytes =
+          img.encodeJpg(resizedImage, quality: 50); // Lower quality to 50%
 
       // Save the resized image back to a file (overwriting the original)
       File resizedImageFile = await image.writeAsBytes(resizedImageBytes);

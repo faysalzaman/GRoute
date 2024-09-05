@@ -439,14 +439,15 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
   Widget _buildLineItemsTable(List<GoodsIssueModel> data) {
     LineItemSource dataSource = LineItemSource(
       data,
-      (GoodsIssueModel item) {},
+      // (GoodsIssueModel item) {},
       (GoodsIssueModel item) {
         AppNavigator.goToPage(
-            context: context,
-            screen: SalesOrderDetailsScreen(
-                gtin: widget.goodsIssueModel.gTIN.toString()));
+          context: context,
+          screen: SalesOrderDetailsScreen(
+            gtin: widget.goodsIssueModel.gTIN.toString(),
+          ),
+        );
       },
-      context,
     );
     return Container(
       color: Colors.white,
