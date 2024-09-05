@@ -978,7 +978,6 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                       ),
                     ),
                     10.width,
-                    // search button
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -987,8 +986,6 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                       ),
                       child: IconButton(
                         onPressed: () {
-                          // search by id
-                          // and search by other feilds also
                           SalesOrderCubit.get(context).assignedOrders =
                               SalesOrderCubit.get(context)
                                   .assignedOrders
@@ -1005,16 +1002,20 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              BlocBuilder<SalesOrderCubit, SalesOrderState>(
-                builder: (context, state) {
-                  return SizedBox(
-                    child: _buildPOListTable(
-                      SalesOrderCubit.get(context).assignedOrders,
-                    ),
-                  );
-                },
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.primaryColor),
+                ),
+                child: BlocBuilder<SalesOrderCubit, SalesOrderState>(
+                  builder: (context, state) {
+                    return SizedBox(
+                      child: _buildPOListTable(
+                        SalesOrderCubit.get(context).assignedOrders,
+                      ),
+                    );
+                  },
+                ),
               ),
-              20.height,
               Container(
                 color: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -1028,7 +1029,10 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                   ),
                 ),
               ),
-              SizedBox(
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.primaryColor),
+                ),
                 child: BlocConsumer<SalesOrderCubit, SalesOrderState>(
                   listener: (context, state) {},
                   builder: (context, state) {
@@ -1041,7 +1045,6 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                   },
                 ),
               ),
-              const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: BlocBuilder<SalesOrderCubit, SalesOrderState>(
@@ -1060,7 +1063,7 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                               ),
                             ),
                             Container(
-                              width: MediaQuery.of(context).size.width * 0.27,
+                              width: MediaQuery.of(context).size.width * 0.3,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                                 vertical: 10,
@@ -1079,48 +1082,6 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                             ),
                           ],
                         ),
-                        // not visible until a row is selected
-
-                        Visibility(
-                          visible: selectedRowIndex != null,
-                          child: GestureDetector(
-                            onTap: () {
-                              AppNavigator.goToPage(
-                                context: context,
-                                screen: AssignRouteScreen(
-                                  index: selectedRowIndex!,
-                                  buttonText: 'Start Journey',
-                                  updateId: SalesOrderCubit.get(context)
-                                      .assignedOrders[selectedRowIndex!]
-                                      .id
-                                      .toString(),
-                                  gcpGlnId: SalesOrderCubit.get(context)
-                                      .assignedOrders[selectedRowIndex!]
-                                      .tblGoodsIssueMaster!
-                                      .gcpGLNID
-                                      .toString(),
-                                  goodsIssueModel: SalesOrderCubit.get(context)
-                                      .goodsIssueDetails[0],
-                                ),
-                              );
-                            },
-                            child: Container(
-                              alignment: Alignment.center,
-                              width: MediaQuery.of(context).size.width * 0.27,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                  color: AppColors.primaryColor,
-                                  borderRadius: BorderRadius.circular(20)),
-                              child: const Text(
-                                "Proceed",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1132,7 +1093,7 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                               ),
                             ),
                             Container(
-                              width: MediaQuery.of(context).size.width * 0.27,
+                              width: MediaQuery.of(context).size.width * 0.3,
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 10),
                               decoration: BoxDecoration(border: Border.all()),
@@ -1149,6 +1110,47 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
                       ],
                     );
                   },
+                ),
+              ),
+              5.height,
+              Visibility(
+                visible: selectedRowIndex != null,
+                child: GestureDetector(
+                  onTap: () {
+                    AppNavigator.goToPage(
+                      context: context,
+                      screen: AssignRouteScreen(
+                        index: selectedRowIndex!,
+                        buttonText: 'Start Journey',
+                        updateId: SalesOrderCubit.get(context)
+                            .assignedOrders[selectedRowIndex!]
+                            .id
+                            .toString(),
+                        gcpGlnId: SalesOrderCubit.get(context)
+                            .assignedOrders[selectedRowIndex!]
+                            .tblGoodsIssueMaster!
+                            .gcpGLNID
+                            .toString(),
+                        goodsIssueModel:
+                            SalesOrderCubit.get(context).goodsIssueDetails[0],
+                      ),
+                    );
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: AppColors.primaryColor,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: const Text(
+                      "Proceed",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -1170,7 +1172,7 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
               SalesOrderCubit.get(context).getGoodsIssueDetails(
                   data[selectedRowIndex!].tblGoodsIssueMaster!.id!);
             } else {
-              selectedRowIndex = null; // Deselect if needed
+              selectedRowIndex = null;
             }
           },
         );
@@ -1181,141 +1183,46 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
       child: DataTableTheme(
         data: DataTableThemeData(
           headingRowColor: MaterialStateColor.resolveWith(
-            (states) => AppColors.primaryColor,
-          ), // Set the header color to blue
+            (states) => Colors.white,
+          ),
           dataRowColor: MaterialStateColor.resolveWith(
             (states) => Colors.white,
-          ), // Set the table cells color to white
+          ),
         ),
         child: PaginatedDataTable(
           columns: const [
+            DataColumn(label: CustomDataColumnLabel(label: 'ID')),
             DataColumn(
-              label: Text(
-                'ID',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label: CustomDataColumnLabel(label: 'Shipping Trx Code')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Ship To Location')),
             DataColumn(
-              label: Text(
-                'Shipping Trx Code',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label: CustomDataColumnLabel(label: 'Grower Supplier GLN')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Ship From GLN')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Ship Date')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Activity Type')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Bis Step')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Disposition')),
             DataColumn(
-              label: Text(
-                'Ship To Location',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label: CustomDataColumnLabel(label: 'Bis Transaction Type')),
             DataColumn(
-              label: Text(
-                'Grower Supplier GLN',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label: CustomDataColumnLabel(label: 'Bis Transaction ID')),
             DataColumn(
-              label: Text(
-                'Ship From GLN',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label: CustomDataColumnLabel(label: 'Purchase Order No')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Sales Order No')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Sales Invoice No')),
             DataColumn(
-              label: Text(
-                'Ship Date',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Activity Type',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Bis Step',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Disposition',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Bis Transaction Type',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Bis Transaction ID',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Purchase Order No',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Sales Order No',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Sales Invoice No',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Transaction Date Time',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'GCP GLN ID',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'GCP NO',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Created At',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Updated At',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Member Id',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label: CustomDataColumnLabel(label: 'Transaction Date Time')),
+            DataColumn(label: CustomDataColumnLabel(label: 'GCP GLN ID')),
+            DataColumn(label: CustomDataColumnLabel(label: 'GCP NO')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Created At')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Updated At')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Member Id')),
           ],
           source: dataSource,
           columnSpacing: 20,
           horizontalMargin: 10,
           rowsPerPage: 2,
           showCheckboxColumn: true,
-          checkboxHorizontalMargin: 10,
         ),
       ),
     );
@@ -1324,25 +1231,6 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
   Widget _buildLineItemsTable(List<GoodsIssueModel> data) {
     LineItemSource dataSource = LineItemSource(
       data,
-      // (GoodsIssueModel item) {
-      //   AppNavigator.goToPage(
-      //     context: context,
-      //     screen: AssignRouteScreen(
-      //       index: data.indexOf(item),
-      //       buttonText: 'Start Journey',
-      //       updateId: SalesOrderCubit.get(context)
-      //           .assignedOrders[selectedRowIndex!]
-      //           .id
-      //           .toString(),
-      //       gcpGlnId: SalesOrderCubit.get(context)
-      //           .assignedOrders[selectedRowIndex!]
-      //           .tblGoodsIssueMaster!
-      //           .gcpGLNID
-      //           .toString(),
-      //       goodsIssueModel: item,
-      //     ),
-      //   );
-      // },
       (GoodsIssueModel item) {
         AppNavigator.goToPage(
           context: context,
@@ -1357,116 +1245,35 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
       child: DataTableTheme(
         data: DataTableThemeData(
           headingRowColor: MaterialStateColor.resolveWith(
-            (states) => AppColors.primaryColor,
-          ), // Set the header color to blue
+            (states) => Colors.white,
+          ),
           dataRowColor: MaterialStateColor.resolveWith(
             (states) => Colors.white,
-          ), // Set the table cells color to white
+          ),
         ),
         child: PaginatedDataTable(
           columns: const [
             DataColumn(
-              label: Text(
-                'Shipping Trx Code',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label: CustomDataColumnLabel(label: 'Shipping Trx Code')),
+            DataColumn(label: CustomDataColumnLabel(label: 'GTIN')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Item SKU')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Batch No')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Serial No')),
             DataColumn(
-              label: Text(
-                'GTIN',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label: CustomDataColumnLabel(label: 'Manufacturing Date')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Expiry Date')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Packaging Date')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Sell By')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Receiving UOM')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Box Barcode')),
+            DataColumn(label: CustomDataColumnLabel(label: 'SSCC Barcode')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Quantity')),
+            DataColumn(label: CustomDataColumnLabel(label: 'EUDAMED Code')),
+            DataColumn(label: CustomDataColumnLabel(label: 'UDI Code')),
+            DataColumn(label: CustomDataColumnLabel(label: 'GPC Code')),
             DataColumn(
-              label: Text(
-                'Item SKU',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Batch No',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Serial No',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Manufacturing Date',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Expiry Date',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Packaging Date',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Sell By',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Receiving UOM',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Box Barcode',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'SSCC Barcode',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Quantity',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'EUDAMED Code',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'UDI Code',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'GPC Code',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Tbl Goods Issue Master Id',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label:
+                    CustomDataColumnLabel(label: 'Tbl Goods Issue Master Id')),
           ],
           source: dataSource,
           columnSpacing: 20,
@@ -1479,9 +1286,37 @@ class _SalesOrderScreenState extends State<SalesOrderScreen> {
   }
 }
 
+class CustomDataColumnLabel extends StatelessWidget {
+  final String label;
+
+  const CustomDataColumnLabel({
+    super.key,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 10,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.primaryColor,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(color: Colors.white),
+      ),
+    );
+  }
+}
+
 class _DataSource extends DataTableSource {
   final List<AssignedOrdersModel> _data;
-  final int? _selectedRowIndex; // Single selected row index
+  final int? _selectedRowIndex;
   final Function(int index, bool selected) _onSelectRow;
 
   _DataSource(this._data, this._selectedRowIndex, this._onSelectRow);
@@ -1532,15 +1367,9 @@ class _DataSource extends DataTableSource {
 
 class LineItemSource extends DataTableSource {
   final List<GoodsIssueModel> _data;
-  // final void Function(GoodsIssueModel) onDoubleTap;
-  final void Function(GoodsIssueModel)
-      onSingleTap; // Add a callback for single tap
+  final void Function(GoodsIssueModel) onSingleTap;
 
-  LineItemSource(
-    this._data,
-    // this.onDoubleTap,
-    this.onSingleTap,
-  );
+  LineItemSource(this._data, this.onSingleTap);
 
   @override
   DataRow getRow(int index) {
@@ -1550,120 +1379,103 @@ class LineItemSource extends DataTableSource {
       cells: <DataCell>[
         DataCell(
           GestureDetector(
-            onTap: () => onSingleTap(data), // Handle single tap
-            // onDoubleTap: () => onDoubleTap(data), // Handle double tap
+            onTap: () => onSingleTap(data),
             child: Text(data.shippingTrxCode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.gTIN ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.itemSKU ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.batchNo ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.serialNo ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.manufacturingDate ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.expiryDate ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.packagingDate ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.sellBy ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.receivingUOM ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.boxBarcode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.sSCCBarcode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.qty ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.eUDAMEDCode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.uDICode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.gPCCode ?? ''),
           ),
         ),
         DataCell(
           GestureDetector(
             onTap: () => onSingleTap(data),
-            // onDoubleTap: () => onDoubleTap(data),
             child: Text(data.tblGoodsIssueMasterId ?? ''),
           ),
         ),

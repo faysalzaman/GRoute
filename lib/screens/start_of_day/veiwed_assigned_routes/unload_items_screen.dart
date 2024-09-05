@@ -184,7 +184,8 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
               padding: const EdgeInsets.all(5),
               height: 40,
               width: double.infinity,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
                 color: AppColors.primaryColor,
               ),
               child: const Center(
@@ -242,7 +243,8 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
               padding: const EdgeInsets.all(5),
               height: 40,
               width: double.infinity,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
                 color: AppColors.primaryColor,
               ),
               child: const Center(
@@ -265,7 +267,8 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
                 padding: const EdgeInsets.all(5),
                 height: 40,
                 width: 100,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
                   color: AppColors.primaryColor,
                 ),
                 child: const Center(
@@ -345,7 +348,8 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
               padding: const EdgeInsets.all(5),
               height: 40,
               width: double.infinity,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
                 color: AppColors.primaryColor,
               ),
               child: const Center(
@@ -416,8 +420,9 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
                   padding: const EdgeInsets.all(5),
                   height: 40,
                   width: double.infinity,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.primaryColor,
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
                     child: state is ImageLoading

@@ -277,8 +277,9 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
                             padding: const EdgeInsets.all(5),
                             height: 50,
                             width: double.infinity,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: AppColors.primaryColor,
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             child: Center(
                               child: Text(
