@@ -444,12 +444,11 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
   Widget _buildLineItemsTable(List<GoodsIssueModel> data) {
     LineItemSource dataSource = LineItemSource(
       data,
-      // (GoodsIssueModel item) {},
       (GoodsIssueModel item) {
         AppNavigator.goToPage(
           context: context,
           screen: SalesOrderDetailsScreen(
-            gtin: widget.goodsIssueModel.gTIN.toString(),
+            gtin: item.gTIN.toString(),
           ),
         );
       },
@@ -459,121 +458,40 @@ class _UnloadItemsScreenState extends State<UnloadItemsScreen>
       child: DataTableTheme(
         data: DataTableThemeData(
           headingRowColor: MaterialStateColor.resolveWith(
-            (states) => Colors.pink,
-          ), // Set the header color to blue
+            (states) => AppColors.primaryColor,
+          ),
           dataRowColor: MaterialStateColor.resolveWith(
             (states) => Colors.white,
-          ), // Set the table cells color to white
+          ),
         ),
         child: PaginatedDataTable(
           columns: const [
             DataColumn(
-              label: Text(
-                'Shipping Trx Code',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label: CustomDataColumnLabel(label: 'Shipping Trx Code')),
+            DataColumn(label: CustomDataColumnLabel(label: 'GTIN')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Item SKU')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Batch No')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Serial No')),
             DataColumn(
-              label: Text(
-                'GTIN',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label: CustomDataColumnLabel(label: 'Manufacturing Date')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Expiry Date')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Packaging Date')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Sell By')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Receiving UOM')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Box Barcode')),
+            DataColumn(label: CustomDataColumnLabel(label: 'SSCC Barcode')),
+            DataColumn(label: CustomDataColumnLabel(label: 'Quantity')),
+            DataColumn(label: CustomDataColumnLabel(label: 'EUDAMED Code')),
+            DataColumn(label: CustomDataColumnLabel(label: 'UDI Code')),
+            DataColumn(label: CustomDataColumnLabel(label: 'GPC Code')),
             DataColumn(
-              label: Text(
-                'Item SKU',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Batch No',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Serial No',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Manufacturing Date',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Expiry Date',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Packaging Date',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Sell By',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Receiving UOM',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Box Barcode',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'SSCC Barcode',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Quantity',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'EUDAMED Code',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'UDI Code',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'GPC Code',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Tbl Goods Issue Master Id',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                label:
+                    CustomDataColumnLabel(label: 'Tbl Goods Issue Master Id')),
           ],
           source: dataSource,
           columnSpacing: 20,
           horizontalMargin: 10,
-          rowsPerPage: 3,
+          rowsPerPage: 2,
           showCheckboxColumn: true,
         ),
       ),

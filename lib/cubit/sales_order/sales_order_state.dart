@@ -9,10 +9,13 @@ final class SalesOrderAssignedOrdersLoading extends SalesOrderState {}
 final class SalesOrderGoodsIssueLoading extends SalesOrderState {}
 
 // SUCCESS
-
 final class SalesOrderAssignedOrdersSuccess extends SalesOrderState {}
 
 final class SalesOrderGoodsIssueSuccess extends SalesOrderState {}
+
+// Filter State
+
+final class SalesOrderAssignedFilterState extends SalesOrderState {}
 
 // ERROR
 final class SalesOrderAssignedOrdersError extends SalesOrderState {

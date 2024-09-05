@@ -14,6 +14,7 @@ class SalesOrderCubit extends Cubit<SalesOrderState> {
 
   //// Variables
   List<AssignedOrdersModel> assignedOrders = [];
+  List<AssignedOrdersModel> filterAssignedOrders = [];
   List<GoodsIssueModel> goodsIssueDetails = [];
   GtinProductModel? gtinProductModel;
 
@@ -26,6 +27,18 @@ class SalesOrderCubit extends Cubit<SalesOrderState> {
       }
       assignedOrders = await SalesOrderController.getAssignedOrders();
       emit(SalesOrderAssignedOrdersSuccess());
+    } catch (e) {
+      emit(SalesOrderAssignedOrdersError(e.toString()));
+    }
+  }
+
+  void getFilterAssignedOrders(var query) async {
+    try {
+      filterAssignedOrders = assignedOrders
+          .where((element) => element.tblGoodsIssueMaster!.salesOrderNo!
+              .toLowerCase()
+              .contains(query))
+          .toList();
     } catch (e) {
       emit(SalesOrderAssignedOrdersError(e.toString()));
     }
