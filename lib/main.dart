@@ -19,9 +19,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // BlocProvider(
-        //   create: (context) => DeliveryAssignmentCubit(),
-        // ),
         BlocProvider(create: (context) => SalesOrderCubit()),
         BlocProvider(create: (context) => CustomersProfileCubit())
       ],
@@ -30,11 +27,11 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue, // Your primary color
           checkboxTheme: CheckboxThemeData(
-            fillColor: MaterialStateProperty.resolveWith((states) {
-              if (states.contains(MaterialState.selected)) {
-                return AppColors.primaryColor; // Change to your primary color
+            fillColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return AppColors.primaryColor;
               }
-              return Colors.white; // Default color when not selected
+              return Colors.white;
             }),
           ),
         ),
