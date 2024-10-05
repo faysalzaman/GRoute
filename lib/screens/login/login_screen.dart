@@ -122,24 +122,28 @@ class _LoginScreenState extends State<LoginScreen> {
                             Column(
                               children: [
                                 SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.15,
-                                ),
+                                    height: MediaQuery.of(context).size.height *
+                                        0.12),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     // GIF image using GifView.asset
-                                    GifView.asset(
-                                      "assets/icons/groute_truck.gif",
-                                      height: 70,
+                                    Expanded(
+                                      flex: 2,
+                                      child: GifView.asset(
+                                        "assets/icons/groute_truck.gif",
+                                        height: 70,
+                                      ),
                                     ),
-                                    const SizedBox(width: 10),
-                                    const Text(
-                                      "Login",
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.primaryColor,
+                                    const Expanded(
+                                      flex: 3,
+                                      child: Text(
+                                        "Login",
+                                        style: TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primaryColor,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -270,6 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ],
                             ),
+                            50.height,
                             Row(
                               children: [
                                 Transform.scale(
