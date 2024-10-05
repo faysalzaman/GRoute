@@ -23,21 +23,27 @@ class AuthCubit extends Cubit<AuthState> {
 
       // Check if any fields are null before saving
       if (user.id != null) await AppPreferences.setUserId(user.id.toString());
-      if (user.memberId != null)
+      if (user.memberId != null) {
         await AppPreferences.setMemberId(user.memberId.toString());
-      if (user.email != null)
+      }
+      if (user.email != null) {
         await AppPreferences.setEmail(user.email.toString());
+      }
       if (user.name != null) await AppPreferences.setName(user.name.toString());
-      if (user.gsrnIdNumber != null)
+      if (user.gsrnIdNumber != null) {
         await AppPreferences.setGsrnIdNumber(user.gsrnIdNumber.toString());
-      if (user.mobileNumber != null)
+      }
+      if (user.mobileNumber != null) {
         await AppPreferences.setMobileNumber(user.mobileNumber.toString());
-      if (user.residenceIdNumber != null)
+      }
+      if (user.residenceIdNumber != null) {
         await AppPreferences.setResidenceIdNumber(
             user.residenceIdNumber.toString());
-      if (user.nationalAddressQRCode != null)
+      }
+      if (user.nationalAddressQRCode != null) {
         await AppPreferences.setNationalAddressQrcode(
             user.nationalAddressQRCode.toString());
+      }
       if (user.role != null) await AppPreferences.setRole(user.role.toString());
 
       // Emit success state with the user data
