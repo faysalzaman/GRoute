@@ -17,6 +17,9 @@ class AuthController {
     final response = await http.post(url, headers: headers, body: body);
 
     var data = jsonDecode(response.body);
+
+    print(data);
+
     if (response.statusCode == 200 || response.statusCode == 201) {
       return LoginModel.fromJson(data['user']);
     } else {
